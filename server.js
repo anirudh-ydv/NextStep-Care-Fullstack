@@ -2,7 +2,7 @@ require('dotenv').config(); // Keeps your environment variables working!
 const express = require('express');
 const mongoose = require('mongoose'); 
 const cors = require('cors');
-const path = require('path'); // ADDED: Needed for finding your HTML files
+const path = require('path'); // Needed for finding your HTML files
 
 // Import your route files
 const authRoutes = require('./routes/auth');
@@ -21,11 +21,10 @@ app.use(express.json());
 app.use(express.static(__dirname)); 
 
 // ==========================================
-// 🚨 THE DATABASE ENGINE (Pointed to the FRESH database)
+// 🚨 THE DATABASE ENGINE 
 // ==========================================
-// We use the hardcoded 'nextstep_clean' here temporarily just to force the wipe!
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ Connected to FRESH Database! (nextstep_clean)"))
+    .then(() => console.log("✅ Connected to the Database!"))
     .catch(err => console.error("❌ Database Connection Failed:", err));
 
 // ==========================================
@@ -35,10 +34,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 
 // ==========================================
-// CATCH-ALL ROUTE
+// CATCH-ALL ROUTE (Express 5 Compatible Fix)
 // ==========================================
 // If someone types a random URL, send them back to the main website
-app.get('*', (req, res) => {
+// (Using app.use without a path bypasses the strict Express 5 wildcard rules)
+app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
