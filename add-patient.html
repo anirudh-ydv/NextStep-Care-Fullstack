@@ -2,35 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Patient - NextStep Care</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); font-family: 'Inter', sans-serif; min-height: 100vh; margin: 0; padding-bottom: 40px; }
+        .navbar { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px;}
+        .nav-brand { color: #1e3c72; font-weight: 700; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;}
+        .form-container { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); padding: 40px; border-radius: 24px; max-width: 900px; margin: 0 auto; box-shadow: 0 15px 35px rgba(0,0,0,0.08);}
+        h2, h3 { color: #1e3c72; }
+        label { color: #334155; font-weight: 600; margin-bottom: 8px; display: block; }
+        input, select { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(30, 60, 114, 0.15); padding: 14px; width: 100%; border-radius: 12px; box-sizing: border-box; }
+        input:focus, select:focus { border-color: #38bdf8; outline: none; }
+        .medicine-entry { background: rgba(255, 255, 255, 0.5); padding: 20px; border-radius: 16px; margin-bottom: 15px; display: flex; gap: 15px; }
+        .medicine-entry input { flex: 1; }
+        button { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; padding: 15px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        button.remove-medicine { background: #e11d48; padding: 14px 20px; flex: none; }
+        button#addMedicine { background: rgba(255, 255, 255, 0.8); color: #1e3c72; border: 1px dashed #1e3c72; width: 100%; margin-bottom: 30px;}
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .back-btn { background: white; color: #1e3c72; border: 1px solid #1e3c72; padding: 8px 15px; border-radius: 10px; text-decoration: none; font-weight: 600; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🏥 Add New Patient Record</h2>
+    <nav class="navbar">
+        <div class="nav-brand"><img src="logo.png" alt="Company Logo" style="max-width:18%; height:18%; margin-right: 10px;"> NextStep-Care</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span id="doctorName" style="font-weight: 600; color: #1e293b;">Dr. Loading...</span>
+            <a href="doctor-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <h2 style="margin-bottom: 30px;"><i class="fas fa-user-plus" style="color: #38bdf8;"></i> Add New Patient</h2>
         <form id="addPatientForm">
-            <div class="grid-container">
-                <div class="form-group">
-                    <label>Patient Name</label>
-                    <input type="text" id="patientName" required placeholder="Full Name">
-                </div>
-                <div class="form-group">
-                    <label>Age</label>
-                    <input type="number" id="age" required>
-                </div>
-                <div class="form-group">
-                    <label>Gender</label>
-                    <select id="gender">
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
+            <div class="form-grid">
+                <div class="input-group"><label>Name</label><input type="text" id="patientName" required></div>
+                <div class="input-group"><label>Patient ID</label><input type="text" id="patientId" required></div>
+                <div class="input-group"><label>Email (For Portal Login)</label><input type="email" id="patientEmail" required></div>
+                
+                
+                <div class="input-group"><label>Age</label><input type="number" id="age" required></div>
+                <div class="input-group"><label>Gender</label><select id="gender" required><option>Male</option><option>Female</option><option>Other</option></select></div>
+                
+                <div class="input-group">
                     <label>Primary Disease</label>
-                    <select id="disease">
+                    <select id="primaryDisease" required>
+                        <option value="" disabled selected>Select condition...</option>
                         <option>Diabetes Type 1</option>
                         <option>Diabetes Type 2</option>
                         <option>Hypertension (High BP)</option>
@@ -48,110 +64,79 @@
                         <option>Other / General Monitoring</option>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label>Current BP</label>
-                    <input type="text" id="bp" placeholder="e.g. 120/80">
-                </div>
-                <div class="form-group">
-                    <label>Blood Sugar</label>
-                    <input type="text" id="sugar" placeholder="e.g. 140">
-                </div>
-                <div class="form-group">
-                    <label>Heart Rate</label>
-                    <input type="text" id="sugar" placeholder="e.g. 140">
-                </div>
-                <div class="form-group">
-                    <label>Hemoglobin</label>
-                    <input type="text" id="hemoglobin" placeholder="e.g. 12.5">
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="status">
-                        <option value="Stable">Stable</option>
-                        <option value="Critical">Critical</option>
-                        <option value="Improving">Improving</option>
-                    </select>
-                </div>
+                
+                <div class="input-group"><label>Current BP</label><input type="text" id="currentBP" placeholder="120/80"></div>
+                <div class="input-group"><label>Blood Sugar</label><input type="number" id="bloodSugar" placeholder="mg/dL"></div>
+                <div class="input-group"><label>Hemoglobin</label><input type="number" id="hemoglobin" step="0.1" placeholder="g/dL"></div>
             </div>
 
-            <h3>💊 Prescriptions</h3>
-            <div id="prescriptionsContainer">
-                <div class="prescription-row">
-                    <input type="text" class="med-name" placeholder="Medicine Name">
-                    <input type="text" class="med-dose" placeholder="Dosage">
-                    <input type="time" class="med-time">
+            <h3 style="margin-top: 30px;"><i class="fas fa-pills" style="color: #38bdf8;"></i> Prescriptions</h3>
+            <div id="medicineSchedule">
+                <div class="medicine-entry">
+                    <input type="text" placeholder="Medicine Name" class="medicine-name" required>
+                    <input type="text" placeholder="Dosage" class="medicine-dosage" required>
+                    <input type="time" class="medicine-time" required>
+                    <button type="button" class="remove-medicine" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
-            <button type="button" onclick="addMedicineRow()" class="btn-secondary">+ Add Medicine</button>
+            <button type="button" id="addMedicine"><i class="fas fa-plus"></i> Add Medicine</button>
 
-            <div class="form-group" style="margin-top: 20px;">
-                <label>Next Appointment Date</label>
-                <input type="date" id="nextAppointment">
+            <div class="form-grid">
+                <div class="input-group"><label>Next Appointment Date</label><input type="date" id="nextAppointment" required></div>
+                <div class="input-group"><label>Status</label><select id="healthStatus" required><option value="stable">Stable</option><option value="moderate">Moderate</option><option value="critical">Critical</option></select></div>
             </div>
-
-            <button type="submit" class="btn-primary">Save Patient Record</button>
+            <button type="submit" style="width: 100%; margin-top: 20px;"><i class="fas fa-save"></i> Save Patient Record</button>
         </form>
     </div>
 
     <script>
-        // Function to add more medicine rows
-        function addMedicineRow() {
-            const container = document.getElementById('prescriptionsContainer');
-            const div = document.createElement('div');
-            div.className = 'prescription-row';
-            div.innerHTML = `
-                <input type="text" class="med-name" placeholder="Medicine Name">
-                <input type="text" class="med-dose" placeholder="Dosage">
-                <input type="time" class="med-time">
-            `;
-            container.appendChild(div);
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user) document.getElementById('doctorName').innerText = `Dr. ${user.name}`;
+        });
 
-        // Handle Form Submission
-        document.getElementById('addPatientForm').addEventListener('submit', async (e) => {
+        document.getElementById('addMedicine').addEventListener('click', function() {
+            const entry = document.createElement('div');
+            entry.className = 'medicine-entry';
+            entry.innerHTML = `<input type="text" placeholder="Medicine Name" class="medicine-name" required><input type="text" placeholder="Dosage" class="medicine-dosage" required><input type="time" class="medicine-time" required><button type="button" class="remove-medicine" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>`;
+            document.getElementById('medicineSchedule').appendChild(entry);
+        });
+
+        document.getElementById('addPatientForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) return window.location.href = 'login.html';
+
+            let medicinesList = [];
+            document.querySelectorAll('.medicine-entry').forEach(entry => {
+                const name = entry.querySelector('.medicine-name').value;
+                if (name) medicinesList.push({ name, dosage: entry.querySelector('.medicine-dosage').value, time: entry.querySelector('.medicine-time').value });
+            });
+
+            const patientData = {
+                name: document.getElementById('patientName').value,
+                patientId: document.getElementById('patientId').value,
+                email: document.getElementById('patientEmail').value,
+                phone: document.getElementById('whatsappNumber').value, // 🚀 Added to payload
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                primaryDisease: document.getElementById('primaryDisease').value,
+                currentBP: document.getElementById('currentBP').value || "120/80",
+                bloodSugar: document.getElementById('bloodSugar').value || 0,
+                hemoglobin: document.getElementById('hemoglobin').value || 0,
+                nextAppointment: document.getElementById('nextAppointment').value,
+                healthStatus: document.getElementById('healthStatus').value,
+                medicines: medicinesList, 
+                assignedDoctorId: currentUser.assignedId
+            };
 
             try {
-                // Collect Prescriptions
-                const medNames = document.querySelectorAll('.med-name');
-                const medDoses = document.querySelectorAll('.med-dose');
-                const medTimes = document.querySelectorAll('.med-time');
-                
-                let prescriptions = [];
-                medNames.forEach((name, index) => {
-                    if (name.value) {
-                        prescriptions.push({
-                            medicine: name.value,
-                            dosage: medDoses[index].value,
-                            time: medTimes[index].value
-                        });
-                    }
+                const response = await fetch('https://nextstep-care.onrender.com/api/patients/add', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patientData)
                 });
-
-                // Collect Patient Data (Safe check for nulls)
-                const patientData = {
-                    name: document.getElementById('patientName').value,
-                    age: document.getElementById('age').value,
-                    gender: document.getElementById('gender').value,
-                    disease: document.getElementById('disease').value,
-                    vitals: {
-                        bp: document.getElementById('bp').value,
-                        sugar: document.getElementById('sugar').value,
-                        hemoglobin: document.getElementById('hemoglobin').value
-                    },
-                    status: document.getElementById('status').value,
-                    prescriptions: prescriptions,
-                    nextAppointment: document.getElementById('nextAppointment').value
-                };
-
-                const response = await axios.post('/api/patients/add', patientData);
-                alert('✅ Patient data saved successfully!');
-                window.location.href = 'doctor-dashboard.html';
-            } catch (err) {
-                console.error(err);
-                alert('❌ Error saving patient data. Check console for details.');
-            }
+                if (response.ok) window.location.href = 'doctor-dashboard.html';
+                else alert("❌ " + (await response.json()).message);
+            } catch (error) { console.error(error); }
         });
     </script>
 </body>
