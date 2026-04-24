@@ -205,8 +205,8 @@ function addMedicineRow() {
 }
 
 // MASTER SAVE FUNCTION
+// MASTER SAVE FUNCTION
 async function handleAddPatient(e) {
-    // Prevent page reload if triggered by a form submit
     if (e) e.preventDefault(); 
 
     const currentUserString = localStorage.getItem('currentUser');
@@ -218,17 +218,15 @@ async function handleAddPatient(e) {
 
     const currentUser = JSON.parse(currentUserString);
 
-    // SAFETY CHECK: Warns if the doctor account is broken/missing an ID
     if (!currentUser.assignedId) {
-        alert("Account Error: Your doctor account is missing an ID. Please register a brand new doctor account to save patients.");
+        alert("Account Error: Your doctor account is missing an ID. Please register a brand new doctor account.");
         return;
     }
     
-    // Gather all the data from the form
     const patientData = {
         name: document.getElementById('patientName')?.value || "Unknown",
         patientId: document.getElementById('patientId')?.value || "",
-        email: document.getElementById('patientEmail')?.value || "", // The Patient Login Email
+        email: document.getElementById('patientEmail')?.value || "", 
         age: document.getElementById('age')?.value || 0,
         gender: document.getElementById('gender')?.value || "",
         primaryDisease: document.getElementById('primaryDisease')?.value || "",
@@ -237,10 +235,9 @@ async function handleAddPatient(e) {
         hemoglobin: document.getElementById('hemoglobin')?.value || "",
         nextAppointment: document.getElementById('nextAppointment')?.value || "",
         healthStatus: document.getElementById('healthStatus')?.value || "Stable",
-        doctorId: currentUser.assignedId // Link to the Doctor!
+        doctorId: currentUser.assignedId 
     };
 
-    // Gather all the dynamic medicine rows
     const medEntries = document.querySelectorAll('.medicine-entry');
     patientData.medicines = Array.from(medEntries).map(entry => ({
         name: entry.querySelector('.medicine-name')?.value || "",
@@ -249,23 +246,23 @@ async function handleAddPatient(e) {
         taken: false
     }));
 
-    // Send the package to the Backend
     try {
-        const response = await fetch('https://nextstep-care.onrender.com/api/patients/add', {
+        // ✅ CHANGED: Using relative path '/api/patients/add'
+        const response = await fetch('/api/patients/add', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(patientData)
         });
 
         if (response.ok) {
-            alert("✅ SUCCESS! Medical record secured AND Patient Login Account created!");
+            alert("✅ SUCCESS! Medical record secured!");
             window.location.href = 'doctor-dashboard.html'; 
         } else {
             const errData = await response.json();
-            alert("❌ Failed to save patient. Error: " + (errData.message || "Check terminal"));
+            alert("❌ Failed to save patient: " + (errData.message || "Unknown Error"));
         }
     } catch (err) {
-        alert("❌ Failed to connect to backend. Is your server (node server.js) running?");
+        alert("❌ Failed to connect to server. Please try again.");
     }
 }
 
