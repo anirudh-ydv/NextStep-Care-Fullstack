@@ -1,7 +1,7 @@
 // ==========================================
 // 1. CONFIGURATION & SECURE AUTH LOGIC
 // ==========================================
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = '/api/auth';
 
 // SECURE LOGIN
 async function handleLogin(e) {
