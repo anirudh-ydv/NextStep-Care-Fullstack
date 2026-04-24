@@ -188,7 +188,7 @@
 
         async function init() {
             try {
-                const res = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${email}`);
+                const res = await fetch(`/api/patients/me/${email}`);
                 patientData = await res.json();
                 
                 document.getElementById('pName').innerText = patientData.name;
@@ -267,7 +267,7 @@
                 document.getElementById('doctorStatusSelect').value = ""; return; 
             }
             try {
-                const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${email}`, { 
+                const res = await fetch(`/api/patients/update/${email}`, { 
                     method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ healthStatus: newStatus }) 
                 });
                 if (res.ok) { 
@@ -294,11 +294,11 @@
 
         async function sendDoctorMessage() {
             const input = document.getElementById('docChatInput'); const text = input.value.trim(); if(!text) return;
-            const freshRes = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${email}`);
+            const freshRes = await fetch(`/api/patients/me/${email}`);
             const freshData = await freshRes.json();
             const newMsg = { sender: 'doctor', message: text, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
             const updatedHistory = [...(freshData.chatHistory || []), newMsg];
-            const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${email}`, { 
+            const res = await fetch(`/api/patients/update/${email}`, { 
                 method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chatHistory: updatedHistory }) 
             });
             if(res.ok) { patientData.chatHistory = updatedHistory; input.value = ''; renderDoctorChat(); }
@@ -307,7 +307,7 @@
         setInterval(async () => {
             const tabChat = document.getElementById('tab-chat');
             if(tabChat && tabChat.classList.contains('active')) {
-                const freshRes = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${email}`);
+                const freshRes = await fetch(`/api/patients/me/${email}`);
                 const freshData = await freshRes.json();
                 if (freshData.chatHistory && freshData.chatHistory.length !== (patientData.chatHistory || []).length) {
                     patientData.chatHistory = freshData.chatHistory; renderDoctorChat();
@@ -347,7 +347,7 @@
         
         async function updateDatabaseMeds(newMeds) { 
             try { 
-                const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${email}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ medicines: newMeds }) }); 
+                const res = await fetch(`/api/patients/update/${email}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ medicines: newMeds }) }); 
                 if(res.ok) { patientData.medicines = newMeds; renderMedicines(); } 
             } catch(e) { console.error(e); } 
         }
@@ -368,14 +368,14 @@
 
         async function scheduleAppt() {
             const date = document.getElementById('apptDate').value, time = document.getElementById('apptTime').value; if(!date || !time) return;
-            await fetch('https://nextstep-care.onrender.com/api/patients/schedule-appointment', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, date, time }) });
+            await fetch('/api/patients/schedule-appointment', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, date, time }) });
             document.getElementById('apptModal').style.display='none'; showToast("Appointment Scheduled & Patient Notified!"); init(); 
         }
 
         async function scheduleTelemed() {
             const dt = document.getElementById('teleDateTime').value; if(!dt) return; 
             const [date, time] = dt.split('T');
-            const res = await fetch('https://nextstep-care.onrender.com/api/patients/schedule-telemed', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, date, time }) });
+            const res = await fetch('/api/patients/schedule-telemed', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, date, time }) });
             await res.json(); 
             showToast(`<i class="fas fa-video"></i> Video Room Link Generated!`);
             setTimeout(() => location.reload(), 1500); 

@@ -181,7 +181,7 @@
                 document.getElementById('docProfileId').innerText = `ID: ${currentUser.assignedId}`;
                 document.getElementById('docProfileEmail').innerText = currentUser.email;
 
-                const response = await fetch(`https://nextstep-care.onrender.com/api/patients/doctor/${currentUser.assignedId}`);
+                const response = await fetch(`/api/patients/doctor/${currentUser.assignedId}`);
 
                 if (response.ok) {
                     allPatients = await response.json(); 
@@ -283,7 +283,7 @@
             }
 
             try {
-                const res = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${email}`);
+                const res = await fetch(`/api/patients/me/${email}`);
                 const patient = await res.json();
                 emptyState.style.display = 'none';
                 grid.style.display = 'grid';
@@ -313,7 +313,7 @@
         async function dischargePatient(dbId) {
             if(confirm("Are you sure you want to discharge this patient?")) {
                 try {
-                    const response = await fetch(`https://nextstep-care.onrender.com/api/patients/remove/${dbId}`, { method: 'DELETE' });
+                    const response = await fetch(`/api/patients/remove/${dbId}`, { method: 'DELETE' });
                     if(response.ok) loadDashboardData(); 
                 } catch(err) { console.error(err); }
             }

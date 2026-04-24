@@ -359,7 +359,7 @@
         async function init() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if(!user) return window.location.href = 'login.html';
-            const res = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${user.email}`);
+            const res = await fetch(`/api/patients/me/${user.email}`);
             patientData = await res.json();
 
             document.getElementById('welcomeName').innerText = patientData.name;
@@ -519,11 +519,11 @@
 
         async function sendMessage() {
             const input = document.getElementById('chatInput'); const text = input.value.trim(); if(!text) return;
-            const freshRes = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${patientData.email}`);
+            const freshRes = await fetch(`/api/patients/me/${patientData.email}`);
             const freshData = await freshRes.json();
             const newMsg = { sender: 'patient', message: text, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
             const updatedHistory = [...(freshData.chatHistory || []), newMsg];
-            const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${patientData.email}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chatHistory: updatedHistory }) });
+            const res = await fetch(`/api/patients/update/${patientData.email}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chatHistory: updatedHistory }) });
             if(res.ok) { patientData.chatHistory = updatedHistory; input.value = ''; renderChat(); }
         }
 
@@ -542,7 +542,7 @@
             document.getElementById('aiTyping').style.display = 'block';
 
             try {
-                const response = await fetch('https://nextstep-care.onrender.com/api/patients/ai-chat', {
+                const response = await fetch('/api/patients/ai-chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
@@ -565,7 +565,7 @@
 
         setInterval(async () => {
             if(document.getElementById('chatModal').style.display === 'flex') {
-                const freshRes = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${patientData.email}`);
+                const freshRes = await fetch(`/api/patients/me/${patientData.email}`);
                 const freshData = await freshRes.json();
                 if (freshData.chatHistory && freshData.chatHistory.length !== (patientData.chatHistory || []).length) {
                     patientData.chatHistory = freshData.chatHistory; renderChat();
@@ -579,7 +579,7 @@
         async function saveVitals() {
             const bp = document.getElementById('inBP').value, sugar = document.getElementById('inSugar').value, hr = document.getElementById('inHR').value, sym = document.getElementById('inSym').value;
             let updatedSymptoms = sym ? [sym] : []; 
-            const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${patientData.email}`, { 
+            const res = await fetch(`/api/patients/update/${patientData.email}`, { 
                 method: 'PUT', headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({ currentBP: bp, bloodSugar: sugar, heartRate: hr, symptoms: updatedSymptoms }) 
             });

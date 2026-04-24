@@ -130,7 +130,7 @@
             };
 
             try {
-                const response = await fetch('https://nextstep-care.onrender.com/api/patients/add', {
+                const response = await fetch('/api/patients/add', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patientData)
                 });
                 if (response.ok) window.location.href = 'doctor-dashboard.html';
