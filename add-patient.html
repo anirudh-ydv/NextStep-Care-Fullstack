@@ -14,7 +14,7 @@
             <div class="grid-container">
                 <div class="form-group">
                     <label>Patient Name</label>
-                    <input type="text" id="patientName" required placeholder="Full Name">
+                    <input type="text" id="patientName" required>
                 </div>
                 <div class="form-group">
                     <label>Age</label>
@@ -25,52 +25,33 @@
                     <select id="gender">
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
-                        <option value="Other">Other</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Primary Disease</label>
                     <select id="disease">
-                        <option>Diabetes Type 1</option>
-                        <option>Diabetes Type 2</option>
-                        <option>Hypertension (High BP)</option>
-                        <option>Coronary Artery Disease</option>
-                        <option>Asthma</option>
-                        <option>COPD</option>
-                        <option>Chronic Kidney Disease</option>
-                        <option>Thyroid Disorder</option>
-                        <option>Rheumatoid Arthritis</option>
-                        <option>Osteoarthritis</option>
-                        <option>Post-Operative Recovery</option>
-                        <option>Gastroesophageal Reflux (GERD)</option>
-                        <option>Anemia</option>
-                        <option>Neurological Disorder</option>
-                        <option>Other / General Monitoring</option>
+                        <option value="Anemia">Anemia</option>
+                        <option value="Diabetes">Diabetes</option>
+                        <option value="Hypertension">Hypertension</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label>Current BP</label>
-                    <input type="text" id="bp" placeholder="e.g. 120/80">
+                    <input type="text" id="bp">
                 </div>
                 <div class="form-group">
                     <label>Blood Sugar</label>
-                    <input type="text" id="sugar" placeholder="e.g. 140">
-                </div>
-                <div class="form-group">
-                    <label>Heart Rate</label>
-                    <input type="text" id="sugar" placeholder="e.g. 140">
+                    <input type="text" id="sugar">
                 </div>
                 <div class="form-group">
                     <label>Hemoglobin</label>
-                    <input type="text" id="hemoglobin" placeholder="e.g. 12.5">
+                    <input type="text" id="hemoglobin">
                 </div>
                 <div class="form-group">
                     <label>Status</label>
                     <select id="status">
                         <option value="Stable">Stable</option>
                         <option value="Critical">Critical</option>
-                        <option value="Improving">Improving</option>
                     </select>
                 </div>
             </div>
@@ -78,79 +59,68 @@
             <h3>💊 Prescriptions</h3>
             <div id="prescriptionsContainer">
                 <div class="prescription-row">
-                    <input type="text" class="med-name" placeholder="Medicine Name">
-                    <input type="text" class="med-dose" placeholder="Dosage">
+                    <input type="text" class="med-name" placeholder="Medicine">
+                    <input type="text" class="med-dose" placeholder="Dose">
                     <input type="time" class="med-time">
                 </div>
             </div>
-            <button type="button" onclick="addMedicineRow()" class="btn-secondary">+ Add Medicine</button>
+            <button type="button" onclick="addMedicineRow()">+ Add Medicine</button>
 
-            <div class="form-group" style="margin-top: 20px;">
-                <label>Next Appointment Date</label>
+            <div class="form-group" style="margin-top:20px;">
+                <label>Next Appointment</label>
                 <input type="date" id="nextAppointment">
             </div>
 
-            <button type="submit" class="btn-primary">Save Patient Record</button>
+            <button type="submit" class="btn-primary">Save Patient</button>
         </form>
     </div>
 
     <script>
-        // Function to add more medicine rows
         function addMedicineRow() {
             const container = document.getElementById('prescriptionsContainer');
             const div = document.createElement('div');
             div.className = 'prescription-row';
             div.innerHTML = `
-                <input type="text" class="med-name" placeholder="Medicine Name">
-                <input type="text" class="med-dose" placeholder="Dosage">
+                <input type="text" class="med-name" placeholder="Medicine">
+                <input type="text" class="med-dose" placeholder="Dose">
                 <input type="time" class="med-time">
             `;
             container.appendChild(div);
         }
 
-        // Handle Form Submission
         document.getElementById('addPatientForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Collect prescriptions safely
+            const prescriptions = Array.from(document.querySelectorAll('.prescription-row')).map(row => ({
+                medicine: row.querySelector('.med-name')?.value || '',
+                dosage: row.querySelector('.med-dose')?.value || '',
+                time: row.querySelector('.med-time')?.value || ''
+            })).filter(p => p.medicine !== '');
+
+            // The "Safety Grab" logic: uses ?.value or empty string if ID is missing
+            const patientData = {
+                name: document.getElementById('patientName')?.value || 'Unknown',
+                age: document.getElementById('age')?.value || 0,
+                gender: document.getElementById('gender')?.value || 'Not Specified',
+                disease: document.getElementById('disease')?.value || 'None',
+                vitals: {
+                    bp: document.getElementById('bp')?.value || 'N/A',
+                    sugar: document.getElementById('sugar')?.value || 'N/A',
+                    hemoglobin: document.getElementById('hemoglobin')?.value || 'N/A'
+                },
+                status: document.getElementById('status')?.value || 'Stable',
+                prescriptions: prescriptions,
+                nextAppointment: document.getElementById('nextAppointment')?.value || ''
+            };
+
             try {
-                // Collect Prescriptions
-                const medNames = document.querySelectorAll('.med-name');
-                const medDoses = document.querySelectorAll('.med-dose');
-                const medTimes = document.querySelectorAll('.med-time');
-                
-                let prescriptions = [];
-                medNames.forEach((name, index) => {
-                    if (name.value) {
-                        prescriptions.push({
-                            medicine: name.value,
-                            dosage: medDoses[index].value,
-                            time: medTimes[index].value
-                        });
-                    }
-                });
-
-                // Collect Patient Data (Safe check for nulls)
-                const patientData = {
-                    name: document.getElementById('patientName').value,
-                    age: document.getElementById('age').value,
-                    gender: document.getElementById('gender').value,
-                    disease: document.getElementById('disease').value,
-                    vitals: {
-                        bp: document.getElementById('bp').value,
-                        sugar: document.getElementById('sugar').value,
-                        hemoglobin: document.getElementById('hemoglobin').value
-                    },
-                    status: document.getElementById('status').value,
-                    prescriptions: prescriptions,
-                    nextAppointment: document.getElementById('nextAppointment').value
-                };
-
                 const response = await axios.post('/api/patients/add', patientData);
-                alert('✅ Patient data saved successfully!');
+                alert('✅ Saved!');
                 window.location.href = 'doctor-dashboard.html';
             } catch (err) {
-                console.error(err);
-                alert('❌ Error saving patient data. Check console for details.');
+                console.error("Save Error:", err);
+                alert('❌ Check console for database error.');
             }
         });
     </script>
