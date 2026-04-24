@@ -113,21 +113,20 @@
                 if (name) medicinesList.push({ name, dosage: entry.querySelector('.medicine-dosage').value, time: entry.querySelector('.medicine-time').value });
             });
 
-            const patientData = {
-                name: document.getElementById('patientName').value,
-                patientId: document.getElementById('patientId').value,
-                email: document.getElementById('patientEmail').value,
-                phone: document.getElementById('whatsappNumber').value, // 🚀 Added to payload
-                age: document.getElementById('age').value,
-                gender: document.getElementById('gender').value,
-                primaryDisease: document.getElementById('primaryDisease').value,
-                currentBP: document.getElementById('currentBP').value || "120/80",
-                bloodSugar: document.getElementById('bloodSugar').value || 0,
-                hemoglobin: document.getElementById('hemoglobin').value || 0,
-                nextAppointment: document.getElementById('nextAppointment').value,
-                healthStatus: document.getElementById('healthStatus').value,
+           const patientData = {
+                name: document.getElementById('patientName')?.value || "",
+                patientId: document.getElementById('patientId')?.value || "",
+                email: document.getElementById('patientEmail')?.value || "",
+                age: document.getElementById('age')?.value || "",
+                gender: document.getElementById('gender')?.value || "",
+                primaryDisease: document.getElementById('primaryDisease')?.value || "",
+                currentBP: document.getElementById('currentBP')?.value || "120/80",
+                bloodSugar: document.getElementById('bloodSugar')?.value || 0,
+                hemoglobin: document.getElementById('hemoglobin')?.value || 0,
+                nextAppointment: document.getElementById('nextAppointment')?.value || "",
+                healthStatus: document.getElementById('healthStatus')?.value || "Stable",
                 medicines: medicinesList, 
-                assignedDoctorId: currentUser.assignedId
+                assignedDoctorId: currentUser?.assignedId || ""
             };
 
             try {
