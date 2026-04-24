@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Profile - NextStep Care</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: #e0f2fe; font-family: 'Inter', sans-serif; min-height: 100vh; margin: 0; padding-bottom: 50px; color: #1e293b;}
+        .navbar { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        
+        .header-card { background: white; border-radius: 16px; padding: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        .header-card h1 { margin: 0 0 10px 0; color: #1e3c72; font-size: 2rem; }
+        .header-meta { color: #0284c7; font-weight: 600; font-size: 0.9rem; display: flex; gap: 15px; margin-bottom: 15px; }
+        
+        .status-badge { background: #dcfce7; color: #166534; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .status-selector { padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.8rem; font-weight: bold; color: #475569; cursor: pointer; margin-left: 10px; background: #f8fafc;}
+        
+        .btn-main { background: #0ea5e9; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 1rem; transition: 0.2s;}
+        .btn-main:hover { background: #0284c7; }
+
+        .tab-nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { background: #f0f9ff; color: #475569; border: none; padding: 12px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .tab-btn.active { background: #1e3c72; color: white; }
+        
+        .tab-content { display: none; background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .vital-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;}
+        .vital-box { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .vital-box p { margin: 0; color: #475569; font-weight: 600; font-size: 0.85rem; }
+        .vital-box h2 { margin: 5px 0 0 0; color: #1e3c72; font-size: 1.8rem; }
+        .vital-box span { font-size: 1rem; color: #94a3b8; }
+        
+        .symptoms-area { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .symptom-badge { background: #fee2e2; color: #e11d48; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; margin-right: 10px; margin-bottom: 10px;}
+
+        .add-med-form { display: flex; gap: 15px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; margin-bottom: 20px; align-items: center;}
+        .add-med-form input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; }
+        .btn-add { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .med-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
+        .med-time { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
+        .btn-remove { background: none; border: none; color: #e11d48; cursor: pointer; font-size: 1.2rem; }
+
+        /* 2x2 Grid specific for Doctor charts */
+        .charts-grid-doc { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-wrapper-doc { background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #e2e8f0; height: 250px; }
+
+        .telemed-center { max-width: 400px; margin: 0 auto; text-align: center; padding: 40px 0; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 16px; width: 350px; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 15px 30px; border-radius: 50px; display: none; z-index: 3000; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div style="color: #1e3c72; font-weight: 700; font-size: 1.3rem;display: flex; align-items: center;"> <img src="logo.png" alt="Company Logo" style="max-width:18%; height:18%; margin-right: 10px;"> NextStep-Care </div>
+        <a href="doctor-dashboard.html" style="text-decoration: none; color: #1e3c72; font-weight: 700;"><i class="fas fa-chevron-left"></i> Back to Dashboard</a>
+    </nav>
+
+    <div class="container">
+        <div class="header-card">
+            <div>
+                <h1 id="pName">Loading...</h1>
+                <div class="header-meta">
+                    <span><i class="far fa-id-card"></i> <span id="pId">--</span></span>
+                    <span><i class="far fa-user"></i> Age: <span id="pAge">--</span></span>
+                    <span><i class="fas fa-bed"></i> <span id="pDisease" style="text-transform: uppercase;">--</span></span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span class="status-badge" id="pStatus">STABLE</span>
+                    <select class="status-selector" id="doctorStatusSelect" onchange="updateHealthStatus(this.value)">
+                        <option value="" disabled selected>Update Status...</option>
+                        <option value="stable">Mark as Stable</option>
+                        <option value="moderate">Mark as Moderate</option>
+                        <option value="critical">Mark as Critical</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <button class="btn-main" onclick="document.getElementById('apptModal').style.display='flex'">
+                    <i class="far fa-calendar-plus"></i> Schedule Appointment
+                </button>
+            </div>
+        </div>
+
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('vitals', this)"><i class="fas fa-notes-medical"></i> Vitals Overview</button>
+            <button class="tab-btn" onclick="switchTab('prescriptions', this)"><i class="fas fa-pills"></i> Prescriptions</button>
+            <button class="tab-btn" onclick="switchTab('charts', this)"><i class="fas fa-chart-line"></i> Recovery Charts</button>
+            <button class="tab-btn" onclick="switchTab('telemed', this)"><i class="fas fa-video"></i> Telemedicine</button>
+            <button class="tab-btn" onclick="switchTab('chat', this)"><i class="fas fa-comments"></i> Direct Chat</button>
+        </div>
+
+        <div id="tab-vitals" class="tab-content active">
+            <div class="vital-grid">
+                <div class="vital-box"><p>Heart Rate</p><h2 id="vHR">-- <span>bpm</span></h2></div>
+                <div class="vital-box"><p>Blood Pressure</p><h2 id="vBP">--</h2></div>
+                <div class="vital-box"><p>Blood Sugar</p><h2 id="vSugar">-- <span>mg/dL</span></h2></div>
+                <div class="vital-box"><p>Hemoglobin</p><h2 id="vHemo">-- <span>g/dL</span></h2></div>
+            </div>
+            <div class="vital-box" style="width: max-content; margin-bottom: 20px;">
+                <p>Next Appointment</p>
+                <h2 id="vAppt" style="color: #0ea5e9;">--</h2>
+            </div>
+            <div class="symptoms-area">
+                <p style="margin: 0 0 15px 0; color: #1e3c72; font-weight: bold;"><i class="fas fa-head-side-cough"></i> Patient Reported Symptoms</p>
+                <div id="symptomsList"></div>
+            </div>
+        </div>
+
+        <div id="tab-prescriptions" class="tab-content">
+            <p style="color: #1e3c72; font-weight: bold; margin-top: 0;"><i class="fas fa-plus-circle"></i> Prescribe New Medicine</p>
+            <div class="add-med-form">
+                <input type="text" id="newMedName" placeholder="Medicine Name">
+                <input type="text" id="newMedDose" placeholder="Dosage (e.g. 500mg)">
+                <input type="time" id="newMedTime">
+                <button class="btn-add" onclick="addMedicine()">Add</button>
+            </div>
+            <div id="medicineList"></div>
+        </div>
+
+        <div id="tab-charts" class="tab-content">
+            <h3 style="color: #1e3c72; margin-top: 0;"><i class="fas fa-chart-area"></i> Recovery Analytics</h3>
+            <div class="charts-grid-doc">
+                <div class="chart-wrapper-doc">
+                    <p style="font-weight:bold; color:#475569; margin-top:0;">Blood Pressure (Sys/Dia)</p>
+                    <canvas id="cBP"></canvas>
+                </div>
+                <div class="chart-wrapper-doc">
+                    <p style="font-weight:bold; color:#475569; margin-top:0;">Blood Sugar Trend</p>
+                    <canvas id="cSugar"></canvas>
+                </div>
+                <div class="chart-wrapper-doc">
+                    <p style="font-weight:bold; color:#475569; margin-top:0;">Hemoglobin Levels</p>
+                    <canvas id="cHemo"></canvas>
+                </div>
+                <div class="chart-wrapper-doc">
+                    <p style="font-weight:bold; color:#475569; margin-top:0;">Heart Rate</p>
+                    <canvas id="cHR"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-telemed" class="tab-content">
+            <div class="telemed-center" id="telemedCenterBox">
+                </div>
+        </div>
+
+        <div id="tab-chat" class="tab-content">
+            <h3 style="color: #1e3c72; margin-top: 0;"><i class="fas fa-comments"></i> Patient Chat Log</h3>
+            <div id="docChatBox" style="height: 350px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="docChatInput" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none;" placeholder="Type your reply to the patient...">
+                <button class="btn-main" onclick="sendDoctorMessage()"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="apptModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #1e3c72; margin-top: 0;">Schedule Appointment</h3>
+            <input type="date" id="apptDate" style="width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box;">
+            <input type="time" id="apptTime" style="width: 100%; padding: 10px; margin-bottom: 20px; box-sizing: border-box;">
+            <button class="btn-main" style="width: 100%; justify-content: center; margin-bottom: 10px;" onclick="scheduleAppt()">Confirm</button>
+            <button onclick="document.getElementById('apptModal').style.display='none'" style="width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer;">Cancel</button>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const email = new URLSearchParams(window.location.search).get('email');
+        let patientData = null;
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        async function init() {
+            try {
+                const res = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${email}`);
+                patientData = await res.json();
+                
+                document.getElementById('pName').innerText = patientData.name;
+                document.getElementById('pId').innerText = patientData.patientId;
+                document.getElementById('pAge').innerText = patientData.age || '--';
+                document.getElementById('pDisease').innerText = patientData.primaryDisease || 'N/A';
+                
+                document.getElementById('pStatus').innerText = (patientData.healthStatus || 'STABLE').toUpperCase();
+                
+                if(patientData.healthStatus === 'stable') { 
+                    document.getElementById('pStatus').style.background = '#dcfce7'; document.getElementById('pStatus').style.color = '#166534'; 
+                }
+                if(patientData.healthStatus === 'moderate') { 
+                    document.getElementById('pStatus').style.background = '#fef08a'; document.getElementById('pStatus').style.color = '#854d0e'; 
+                }
+                if(patientData.healthStatus === 'critical') { 
+                    document.getElementById('pStatus').style.background = '#fee2e2'; document.getElementById('pStatus').style.color = '#e11d48'; 
+                }
+
+                document.getElementById('vHR').innerHTML = `${patientData.heartRate || '--'} <span>bpm</span>`;
+                document.getElementById('vBP').innerText = patientData.currentBP || '--';
+                document.getElementById('vSugar').innerHTML = `${patientData.bloodSugar || '--'} <span>mg/dL</span>`;
+                document.getElementById('vHemo').innerHTML = `${patientData.hemoglobin || '--'} <span>g/dL</span>`;
+                
+                let apptDisplay = 'None Scheduled';
+                if (patientData.nextAppointment) {
+                    const apptDate = new Date(patientData.nextAppointment);
+                    const now = new Date();
+                    if (apptDate < now) { 
+                        apptDisplay = `<span style="color: #94a3b8;"><i class="fas fa-check-circle"></i> Passed / Attended (${apptDate.toLocaleDateString()})</span>`; 
+                    } else { 
+                        apptDisplay = apptDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + apptDate.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'}); 
+                    }
+                }
+                document.getElementById('vAppt').innerHTML = apptDisplay;
+
+                const symArea = document.getElementById('symptomsList');
+                if (patientData.symptoms && patientData.symptoms.length > 0) {
+                    symArea.innerHTML = patientData.symptoms.map(s => `<span class="symptom-badge"><i class="fas fa-exclamation-circle"></i> ${s}</span>`).join('');
+                } else { 
+                    symArea.innerHTML = `<span class="symptom-badge" style="background:#f1f5f9; color:#64748b;"><i class="fas fa-check"></i> No symptoms reported</span>`; 
+                }
+
+                if (patientData.nextTelemedSession && patientData.nextTelemedSession.link) {
+                    document.getElementById('telemedCenterBox').innerHTML = `
+                        <i class="fas fa-video" style="font-size: 60px; color: #10b981; margin-bottom: 20px;"></i>
+                        <h2 style="color: #1e3c72;">Active Video Consultation</h2>
+                        <p style="color: #64748b; margin-bottom: 20px;">Session scheduled for: <strong>${patientData.nextTelemedSession.date} at ${patientData.nextTelemedSession.time}</strong></p>
+                        <a href="${patientData.nextTelemedSession.link}" target="_blank" class="btn-main" style="width: 100%; justify-content: center; background: #10b981; text-decoration: none;">
+                            <i class="fas fa-phone-alt"></i> Join Video Call Now
+                        </a>
+                        <hr style="border: 1px solid #e2e8f0; margin: 30px 0;">
+                        <h4 style="color: #475569;">Schedule a New Session</h4>
+                        <input type="datetime-local" id="teleDateTime" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 20px; font-family: inherit;">
+                        <button class="btn-main" style="width: 100%; justify-content: center;" onclick="scheduleTelemed()"><i class="fas fa-calendar-plus"></i> Generate New Link</button>
+                    `;
+                } else {
+                    document.getElementById('telemedCenterBox').innerHTML = `
+                        <i class="fas fa-laptop-medical" style="font-size: 60px; color: #0ea5e9; margin-bottom: 20px;"></i>
+                        <h2 style="color: #1e3c72;">Virtual Video Consultation</h2>
+                        <p style="color: #64748b; margin-bottom: 30px;">Schedule a secure Video session. The patient will receive an automated link.</p>
+                        <input type="datetime-local" id="teleDateTime" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 20px; font-family: inherit;">
+                        <button class="btn-main" style="width: 100%; justify-content: center;" onclick="scheduleTelemed()"><i class="fas fa-video"></i> Schedule & Notify</button>
+                    `;
+                }
+
+                renderMedicines();
+                renderCharts();
+                renderDoctorChat(); 
+            } catch (err) { console.error(err); }
+        }
+
+        async function updateHealthStatus(newStatus) {
+            if(!newStatus) return;
+            if(!confirm(`Are you sure you want to mark this patient as ${newStatus.toUpperCase()}?`)) { 
+                document.getElementById('doctorStatusSelect').value = ""; return; 
+            }
+            try {
+                const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${email}`, { 
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ healthStatus: newStatus }) 
+                });
+                if (res.ok) { 
+                    showToast(`<i class="fas fa-check-circle"></i> Patient marked as ${newStatus.toUpperCase()}`); 
+                    document.getElementById('doctorStatusSelect').value = ""; init(); 
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function renderDoctorChat() {
+            const chatBox = document.getElementById('docChatBox');
+            const history = patientData.chatHistory || [];
+            if(history.length === 0) { 
+                chatBox.innerHTML = '<p style="text-align:center; color:#94a3b8;">Chat started with Patient.</p>'; return; 
+            }
+            chatBox.innerHTML = history.map(c => {
+                const isDoc = c.sender === 'doctor';
+                const bg = isDoc ? '#38bdf8' : '#e2e8f0'; const color = isDoc ? 'white' : '#1e293b'; const align = isDoc ? 'flex-end' : 'flex-start';
+                return `<div style="max-width: 70%; padding: 10px 15px; border-radius: 15px; background: ${bg}; color: ${color}; align-self: ${align}; font-size: 0.9rem;">
+                    <strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">${isDoc ? 'You' : 'Patient'} - ${c.time}</strong>${c.message}</div>`;
+            }).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendDoctorMessage() {
+            const input = document.getElementById('docChatInput'); const text = input.value.trim(); if(!text) return;
+            const freshRes = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${email}`);
+            const freshData = await freshRes.json();
+            const newMsg = { sender: 'doctor', message: text, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+            const updatedHistory = [...(freshData.chatHistory || []), newMsg];
+            const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${email}`, { 
+                method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chatHistory: updatedHistory }) 
+            });
+            if(res.ok) { patientData.chatHistory = updatedHistory; input.value = ''; renderDoctorChat(); }
+        }
+
+        setInterval(async () => {
+            const tabChat = document.getElementById('tab-chat');
+            if(tabChat && tabChat.classList.contains('active')) {
+                const freshRes = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${email}`);
+                const freshData = await freshRes.json();
+                if (freshData.chatHistory && freshData.chatHistory.length !== (patientData.chatHistory || []).length) {
+                    patientData.chatHistory = freshData.chatHistory; renderDoctorChat();
+                }
+            }
+        }, 3000);
+
+        function renderMedicines() {
+            const list = document.getElementById('medicineList');
+            if(!patientData.medicines || patientData.medicines.length === 0) { 
+                list.innerHTML = "<p>No prescriptions found.</p>"; return; 
+            }
+            list.innerHTML = patientData.medicines.map((m, index) => `
+                <div class="med-item">
+                    <div>
+                        <h4 style="margin: 0 0 5px 0; color: #1e3c72;">${m.name}</h4>
+                        <p style="margin: 0; color: #475569; font-size: 0.9rem;">Dosage: ${m.dosage}</p>
+                        <span class="med-time"><i class="far fa-clock"></i> ${m.time}</span>
+                    </div>
+                    <button class="btn-remove" onclick="removeMedicine(${index})"><i class="fas fa-times"></i></button>
+                </div>
+            `).join('');
+        }
+
+        async function addMedicine() {
+            const name = document.getElementById('newMedName').value, dosage = document.getElementById('newMedDose').value, time = document.getElementById('newMedTime').value;
+            if(!name || !dosage || !time) return alert("Fill all fields");
+            const newMeds = [...(patientData.medicines || []), { name, dosage, time }];
+            await updateDatabaseMeds(newMeds);
+            document.getElementById('newMedName').value = ''; document.getElementById('newMedDose').value = ''; document.getElementById('newMedTime').value = '';
+        }
+        
+        async function removeMedicine(index) { 
+            if(!confirm("Remove this medicine?")) return; 
+            const newMeds = [...patientData.medicines]; newMeds.splice(index, 1); await updateDatabaseMeds(newMeds); 
+        }
+        
+        async function updateDatabaseMeds(newMeds) { 
+            try { 
+                const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${email}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ medicines: newMeds }) }); 
+                if(res.ok) { patientData.medicines = newMeds; renderMedicines(); } 
+            } catch(e) { console.error(e); } 
+        }
+
+        // 🚀 UPDATED CHART RENDERING (CURVY & SHADED)
+        function renderCharts() {
+            const history = patientData.historicalVitals || []; 
+            if(history.length === 0) return;
+            
+            const dates = history.map(v => v.date); 
+            const opts = { maintainAspectRatio: false, plugins: { legend: { display: false } } };
+            
+            new Chart(document.getElementById('cBP').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ data: history.map(v => v.systolic), borderColor: '#e11d48', tension: 0.4 }, { data: history.map(v => v.diastolic), borderColor: '#d97706', borderDash: [5,5], tension: 0.4 }]}, options: opts });
+            new Chart(document.getElementById('cSugar').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ data: history.map(v => v.sugar), borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.1)', fill: true, tension: 0.4 }]}, options: opts });
+            new Chart(document.getElementById('cHemo').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ data: history.map(v => v.hemoglobin), borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.4 }]}, options: opts });
+            new Chart(document.getElementById('cHR').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ data: history.map(v => v.heartRate), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.4 }]}, options: opts });
+        }
+
+        async function scheduleAppt() {
+            const date = document.getElementById('apptDate').value, time = document.getElementById('apptTime').value; if(!date || !time) return;
+            await fetch('https://nextstep-care.onrender.com/api/patients/schedule-appointment', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, date, time }) });
+            document.getElementById('apptModal').style.display='none'; showToast("Appointment Scheduled & Patient Notified!"); init(); 
+        }
+
+        async function scheduleTelemed() {
+            const dt = document.getElementById('teleDateTime').value; if(!dt) return; 
+            const [date, time] = dt.split('T');
+            const res = await fetch('https://nextstep-care.onrender.com/api/patients/schedule-telemed', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, date, time }) });
+            await res.json(); 
+            showToast(`<i class="fas fa-video"></i> Video Room Link Generated!`);
+            setTimeout(() => location.reload(), 1500); 
+        }
+        
+        function showToast(msg) { const t = document.getElementById('toast'); t.innerHTML = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 4500); }
+        window.onload = init;
+    </script>
+</body>
+</html>

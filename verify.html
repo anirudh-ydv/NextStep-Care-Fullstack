@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify OTP - NextStep Care</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #f0f9ff; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+        .box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        input { width: 100%; padding: 15px; margin: 20px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 1.2rem; text-align: center; letter-spacing: 10px; }
+        button { width: 100%; padding: 15px; background: #1e3c72; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Enter Verification Code</h2>
+        <p>We sent a 6-digit code to your email.</p>
+        <input type="text" id="otpCode" placeholder="000000" maxlength="6">
+        <button onclick="verifyAccount()">Verify & Register</button>
+    </div>
+
+    <script>
+        async function verifyAccount() {
+            const email = localStorage.getItem('emailToVerify');
+            const otp = document.getElementById('otpCode').value;
+
+            const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, otp })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(`Account Verified! Your ID: ${data.assignedId}`);
+                window.location.href = 'login.html';
+            } else {
+                alert(data.message);
+            }
+        }
+    </script>
+</body>
+</html>

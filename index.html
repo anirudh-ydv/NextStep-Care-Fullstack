@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextStep Care | Smart Recovery. Stronger Tomorrow.</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Base Setup */
+        body { margin: 0; font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #334155; overflow-x: hidden; }
+        a { text-decoration: none; }
+        
+        /* Navbar */
+        .navbar { background: white; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: 800; color: #1e3c72; }
+        .nav-logo img { height: 40px; }
+        .nav-links { display: flex; gap: 30px; align-items: center; font-weight: 600; color: #475569; }
+        .nav-links a { color: #475569; transition: color 0.3s; }
+        .nav-links a:hover { color: #0ea5e9; }
+
+        /* Hero Section */
+        .hero { display: flex; align-items: center; justify-content: space-between; padding: 80px 50px; background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%); min-height: 70vh; }
+        .hero-text { max-width: 50%; }
+        .hero-text h1 { font-size: 3.5rem; color: #1e3c72; line-height: 1.2; margin-bottom: 20px; }
+        .hero-text h1 span { color: #0ea5e9; }
+        .hero-text p { font-size: 1.2rem; color: #64748b; margin-bottom: 40px; line-height: 1.6; }
+        
+        .hero-image { max-width: 45%; text-align: right; }
+        .hero-image img { width: 100%; max-width: 500px; animation: float 6s ease-in-out infinite; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 20px; }
+        .btn { padding: 15px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px; border: none; }
+        .btn-patient { background: #0ea5e9; color: white; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.3); }
+        .btn-patient:hover { background: #0284c7; transform: translateY(-3px); }
+        .btn-doctor { background: white; color: #1e3c72; border: 2px solid #1e3c72; }
+        .btn-doctor:hover { background: #1e3c72; color: white; transform: translateY(-3px); }
+
+        /* Features Section */
+        .features { padding: 80px 50px; text-align: center; background: white; }
+        .features-header h2 { font-size: 2.5rem; color: #1e3c72; margin-bottom: 10px; }
+        .features-header p { color: #64748b; font-size: 1.1rem; margin-bottom: 50px; }
+        
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+        .feature-card { background: #f8fafc; padding: 40px 20px; border-radius: 20px; border: 1px solid #e2e8f0; transition: 0.3s; }
+        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); border-color: #0ea5e9; background: white; }
+        .feature-icon { width: 70px; height: 70px; background: #e0f2fe; color: #0ea5e9; font-size: 30px; display: flex; justify-content: center; align-items: center; border-radius: 50%; margin: 0 auto 20px auto; }
+        .feature-card h3 { color: #1e3c72; margin-bottom: 15px; font-size: 1.3rem; }
+        .feature-card p { color: #64748b; line-height: 1.5; font-size: 0.95rem; }
+
+        /* Team Section (Great for Capstone) */
+        .team { padding: 60px 50px; background: #1e3c72; color: white; text-align: center; }
+        .team h2 { font-size: 2rem; margin-bottom: 10px; }
+        .team p { color: #94a3b8; margin-bottom: 30px; }
+        .team-members { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-weight: bold; font-size: 1.1rem; color: #e0f2fe; }
+        .team-members span { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 30px; background: #0f172a; color: #64748b; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="nav-logo">
+            <img src="logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/40?text=🏥'">
+            NextStep-Care
+        </div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#features">Features</a>
+            <a href="#team">About Project</a>
+            <a href="login.html" class="btn btn-patient" style="padding: 10px 20px; font-size: 0.95rem;">Login</a>
+        </div>
+    </div>
+
+    <div class="hero" id="home">
+        <div class="hero-text">
+            <h1>NextStep-Care</h1><br>
+            <h2 style="color: #1e3c72;">Smart Recovery. <span style="color: #0ea5e9;">Stronger Tomorrow.</span></h2>
+            <p>A revolutionary post-hospital care platform bridging the gap between doctors and patients. Monitor vitals, track medications, consult via telemedicine, and get instant guidance from our AI Assistant.</p>
+            
+            <div class="btn-group">
+                <a href="login.html" class="btn btn-patient"><i class="fas fa-user"></i> Patient Portal</a>
+                <a href="doctor-dashboard.html" class="btn btn-doctor"><i class="fas fa-user-md"></i> Doctor Portal</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="image.png" alt="NextStep Care Platform" style="border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 550px;">
+        </div>
+    </div>
+
+    <div class="features" id="features">
+        <div class="features-header">
+            <h2>Why Choose NextStep-Care?</h2>
+            <p>Built with modern technology to ensure seamless healthcare management.</p>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-video"></i></div>
+                <h3>Automated Telemedicine</h3>
+                <p>One-click secure Jitsi video consultations. No downloads required, connecting doctors and patients instantly.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                <h3>AI Medical Assistant</h3>
+                <p>Powered by Google's Gemini AI, our floating chatbot provides 24/7 personalized diet, exercise, and wellness advice.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Dynamic Vitals Analytics</h3>
+                <p>Track blood pressure, heart rate, and sugar levels with interactive, curvy graphical charts for easy medical review.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-language"></i></div>
+                <h3>Bilingual Support</h3>
+                <p>Healthcare for everyone. Seamlessly toggle the entire patient dashboard between English and Hindi.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="team" id="team">
+        <h2>Built for the Future of Healthcare</h2>
+        <p>| B.Tech Computer Science & Engineering Project |</p>
+        
+        <div class="team-members">
+            <span>👨‍💻 Anirudh Yadav</span>
+        </div>
+        
+       
+    </div>
+
+    <div class="footer">
+        &copy; 2026 NextStep-Care. All rights reserved. <br>
+        A post-hospital care follow-up solution aligned with SDG 3 (Good Health) & SDG 10 (Reduced Inequalities).
+    </div>
+
+</body>
+</html>

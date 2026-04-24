@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal - NextStep Care</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #dcf2fd; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 250px; background: #eef8ff; border-right: 1px solid #d1e8f5; padding-top: 20px; flex-shrink: 0; overflow-y: auto; }
+        .sidebar-item { padding: 15px 20px; color: #334155; text-decoration: none; display: block; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .sidebar-item:hover, .sidebar-item.active { background: #dcf2fd; color: #1e3c72; }
+        .sidebar-item.active { border-left: 4px solid #1e3c72; font-weight: bold; }
+        .sidebar-item i { margin-right: 15px; width: 20px; text-align: center; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 10; position: sticky; top: 0; }
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        
+        .btn-update { background: #0ea5e9; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3); font-size: 1rem;}
+        .btn-update:hover { background: #0284c7; transform: translateY(-2px); }
+        .btn-update:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
+
+        .icon-btn { background: #f1f5f9; border: none; color: #1e3c72; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; position: relative; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
+        .icon-btn:hover { background: #e2e8f0; }
+        .icon-btn.lang-btn { width: auto; padding: 0 15px; border-radius: 20px; font-weight: bold; gap: 5px; }
+        
+        .ai-btn { background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);}
+        .ai-btn:hover { transform: scale(1.05); }
+
+        .badge { position: absolute; top: -5px; right: -5px; background: #e11d48; color: white; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; font-weight: bold; border: 2px solid white; }
+        .btn-logout { background: #e11d48; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-left: 10px; }
+
+        .dashboard-container { padding: 30px; }
+        .section-view { display: none; }
+        .section-view.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .glass-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .vital-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px; }
+        .vital-box { background: #f8fafc; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #e2e8f0; }
+        .vital-box h4 { margin: 0; color: #64748b; font-size: 0.8rem; text-transform: uppercase; }
+        .vital-box h2 { margin: 10px 0 0 0; color: #1e3c72; font-size: 1.6rem; }
+
+        .med-item { background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; }
+        .notif-item { padding: 15px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 15px; align-items: flex-start; }
+        .notif-icon { background: #e0f2fe; color: #0284c7; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        
+        .btn-take-med { background: #1e3c72; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s;}
+        .btn-take-med:hover { background: #0f172a; }
+        .btn-take-med:disabled { cursor: not-allowed; }
+        .btn-missed { background: #e11d48 !important; text-decoration: line-through; opacity: 0.7; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: not-allowed;}
+
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-wrapper { background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #e2e8f0; height: 250px; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 400px; max-height: 80vh; overflow-y: auto; text-align: center;}
+        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; }
+        
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 15px 30px; border-radius: 50px; display: none; z-index: 3000; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        .dashboard-top-area { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+        .persistent-alert { display: none; padding: 15px 25px; border-radius: 15px; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .alert-red { background: #fee2e2; border: 1px solid #f87171; color: #991b1b; }
+        .alert-warning { background: #fffbeb; border: 1px solid #f59e0b; color: #b45309; }
+
+        .chat-box { height: 300px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 0.9rem; }
+        .msg.doc { background: #e2e8f0; color: #1e293b; align-self: flex-start; border-bottom-left-radius: 2px;}
+        .msg.pat { background: #38bdf8; color: white; align-self: flex-end; border-bottom-right-radius: 2px;}
+        
+        .msg.ai { background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; align-self: flex-start; border-bottom-left-radius: 2px;}
+        .typing-indicator { color: #8b5cf6; font-size: 0.9rem; font-style: italic; text-align: left; display: none; }
+
+        .plan-header { color: #1e3c72; font-size: 1.5rem; border-bottom: 2px solid #e0f2fe; padding-bottom: 10px; margin-bottom: 20px;}
+        .plan-content { font-size: 1.05rem; line-height: 1.6; color: #334155; background: #f8fafc; padding: 25px; border-radius: 15px; border: 1px dashed #cbd5e1;}
+        .meal-time { color: #0ea5e9; font-weight: bold; margin-top: 15px; margin-bottom: 5px; display: block; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;}
+        .plan-content ul { margin-top: 5px; padding-left: 20px;}
+        .plan-content li { margin-bottom: 8px;}
+
+        /* 🚀 NEW FLOATING AI WIDGET STYLES */
+        .floating-ai-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            color: white;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
+            transition: transform 0.3s;
+            z-index: 2000;
+            border: none;
+        }
+        .floating-ai-btn:hover {
+            transform: scale(1.1);
+        }
+        .floating-chat-window {
+            position: fixed;
+            bottom: 110px;
+            right: 30px;
+            width: 360px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 2px solid #8b5cf6;
+            display: none;
+            flex-direction: column;
+            z-index: 2000;
+            overflow: hidden;
+            transform-origin: bottom right;
+            animation: popUp 0.3s ease-out forwards;
+        }
+        @keyframes popUp {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .ai-chat-header {
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div style="padding: 15px; font-weight: 700; color: #1e3c72; font-size: 1.2rem;display: flex; align-items: center;"> <img src="logo.png" alt="Company Logo" style="max-width:32%; height:32%; margin-right: 10px;">NextStep-Care </div>
+        <a onclick="switchTab('overview')" id="tab-overview" class="sidebar-item active"><i class="fas fa-home"></i> <span class="lang-text" data-en="Health Overview" data-hi="स्वास्थ्य अवलोकन">Health Overview</span></a>
+        <a onclick="switchTab('history')" id="tab-history" class="sidebar-item"><i class="fas fa-chart-line"></i> <span class="lang-text" data-en="Recovery History" data-hi="रिकवरी इतिहास">Recovery History</span></a>
+        <a onclick="switchTab('meds')" id="tab-meds" class="sidebar-item"><i class="fas fa-pills"></i> <span class="lang-text" data-en="My Prescriptions" data-hi="मेरी दवाइयां">My Prescriptions</span></a>
+        <a onclick="switchTab('diet')" id="tab-diet" class="sidebar-item"><i class="fas fa-apple-alt"></i> <span class="lang-text" data-en="Diet Plan" data-hi="आहार योजना">Diet Plan</span></a>
+        <a onclick="switchTab('exercise')" id="tab-exercise" class="sidebar-item"><i class="fas fa-running"></i> <span class="lang-text" data-en="Physical Activity" data-hi="शारीरिक गतिविधि">Physical Activity</span></a>
+        <a onclick="switchTab('profile')" id="tab-profile" class="sidebar-item"><i class="fas fa-user"></i> <span class="lang-text" data-en="My Profile" data-hi="मेरी प्रोफाइल">My Profile</span></a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h3 style="margin:0; color: #1e3c72;">
+                <span class="lang-text" data-en="Welcome," data-hi="स्वागत है,">Welcome,</span> <span id="welcomeName">Loading...</span>
+            </h3>
+            <div class="header-actions">
+                <button class="icon-btn lang-btn" onclick="toggleLanguage()">
+                    <i class="fas fa-language"></i> <span id="langIndicator">हिंदी</span>
+                </button>
+                <button class="icon-btn" onclick="openChatModal()" title="Chat with Doctor">
+                    <i class="fas fa-user-md"></i>
+                </button>
+                <button class="icon-btn" onclick="openModal('notifModal')">
+                    <i class="fas fa-bell"></i><span class="badge" id="notifBadge">0</span>
+                </button>
+                <button class="btn-logout" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <div id="view-overview" class="section-view active">
+                
+                <div class="dashboard-top-area">
+                    <div id="missedMedBanner" class="persistent-alert alert-red">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 1.8rem;"></i>
+                            <div>
+                                <h4 style="margin: 0 0 5px 0;" class="lang-text" data-en="Missed Medications" data-hi="छूटी हुई दवाइयां">Missed Medications</h4>
+                                <p id="missedMedBannerText" style="margin: 0; font-size: 0.95rem; font-weight: bold;"></p>
+                            </div>
+                        </div>
+                        <button class="btn-update" style="background: #991b1b; padding: 8px 15px; font-size: 0.9rem;" onclick="openChatModal()">
+                            <i class="fas fa-comments"></i> <span class="lang-text" data-en="Contact Doctor" data-hi="डॉक्टर से बात करें">Contact Doctor</span>
+                        </button>
+                    </div>
+                    
+                    <div id="upcomingMedBanner" class="persistent-alert alert-warning">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <i class="fas fa-clock" style="font-size: 1.8rem;"></i>
+                            <div>
+                                <h4 style="margin: 0 0 5px 0;" class="lang-text" data-en="Medicine Due Now!" data-hi="दवा का समय हो गया!">Medicine Due Now!</h4>
+                                <p id="upcomingMedBannerText" style="margin: 0; font-size: 0.95rem; font-weight: bold;"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vital-grid">
+                    <div class="vital-box"><h4 class="lang-text" data-en="Heart Rate" data-hi="हृदय गति">Heart Rate</h4><h2 id="vHR">--</h2></div>
+                    <div class="vital-box"><h4 class="lang-text" data-en="Blood Pressure" data-hi="रक्तचाप (BP)">Blood Pressure</h4><h2 id="vBP">--</h2></div>
+                    <div class="vital-box"><h4 class="lang-text" data-en="Blood Sugar" data-hi="ब्लड शुगर">Blood Sugar</h4><h2 id="vSugar">--</h2></div>
+                    <div class="vital-box"><h4 class="lang-text" data-en="Hemoglobin" data-hi="हीमोग्लोबिन">Hemoglobin</h4><h2 id="vHemo">--</h2></div>
+                </div>
+
+                <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin-top:0; color:#1e3c72;"><i class="fas fa-calendar-check"></i> <span class="lang-text" data-en="Next Appointment" data-hi="अगली नियुक्ति">Next Appointment</span></h3>
+                        <p id="vAppt" style="margin:0; font-size: 1.2rem; font-weight: bold; color: #0ea5e9;">--</p>
+                    </div>
+                    <div>
+                        <button class="btn-update" id="mainUpdateHealthBtn" onclick="checkUpdateVitals()">
+                            <i class="fas fa-notes-medical"></i> <span class="lang-text" data-en="Update Health" data-hi="स्वास्थ्य अपडेट">Update Health</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-history" class="section-view">
+                <div class="glass-card">
+                    <h3 class="lang-text" data-en="Your Recovery Progress" data-hi="आपकी रिकवरी प्रगति">Your Recovery Progress</h3>
+                    <div class="charts-grid">
+                        <div class="chart-wrapper"><p style="font-weight:bold; color:#475569; margin-top:0;" class="lang-text" data-en="Heart Rate" data-hi="हृदय गति">Heart Rate</p><canvas id="pChartHR"></canvas></div>
+                        <div class="chart-wrapper"><p style="font-weight:bold; color:#475569; margin-top:0;" class="lang-text" data-en="Blood Pressure" data-hi="रक्तचाप (BP)">Blood Pressure</p><canvas id="pChartBP"></canvas></div>
+                        <div class="chart-wrapper"><p style="font-weight:bold; color:#475569; margin-top:0;" class="lang-text" data-en="Blood Sugar" data-hi="ब्लड शुगर">Blood Sugar</p><canvas id="pChartSugar"></canvas></div>
+                        <div class="chart-wrapper"><p style="font-weight:bold; color:#475569; margin-top:0;" class="lang-text" data-en="Hemoglobin" data-hi="हीमोग्लोबिन">Hemoglobin</p><canvas id="pChartHemo"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-meds" class="section-view">
+                <div class="glass-card">
+                    <h3 style="margin-top:0;"><i class="fas fa-prescription-bottle-alt"></i> <span class="lang-text" data-en="All Active Prescriptions" data-hi="सभी सक्रिय दवाइयां">All Active Prescriptions</span></h3>
+                    <p style="color: #64748b; font-size: 0.9rem;" class="lang-text" data-en="*Please mark medicines as 'Taken' within 30 minutes of the prescribed time." data-hi="*कृपया निर्धारित समय के 30 मिनट के भीतर दवा को 'लिया गया' के रूप में चिह्नित करें।">*Please mark medicines as 'Taken' within 30 minutes of the prescribed time.</p>
+                    <div id="medicationListFull"></div>
+                </div>
+            </div>
+            
+            <div id="view-diet" class="section-view">
+                <div class="glass-card">
+                    <h2 class="plan-header"><i class="fas fa-apple-alt"></i> <span class="lang-text" data-en="Clinical Diet Plan" data-hi="क्लिनिकल आहार योजना">Clinical Diet Plan</span></h2>
+                    <p style="color: #64748b; font-size: 0.95rem; margin-top: -10px;" class="lang-text" data-en="Based on your primary diagnosis, follow this daily nutrition guide:" data-hi="आपके प्राथमिक निदान के आधार पर, इस दैनिक पोषण गाइड का पालन करें:">Based on your primary diagnosis, follow this daily nutrition guide:</p>
+                    <div class="plan-content" id="dietPlanContent"></div>
+                </div>
+            </div>
+
+            <div id="view-exercise" class="section-view">
+                <div class="glass-card">
+                    <h2 class="plan-header"><i class="fas fa-running"></i> <span class="lang-text" data-en="Physical Activity & Yoga" data-hi="शारीरिक गतिविधि और योग">Physical Activity & Yoga</span></h2>
+                    <p style="color: #64748b; font-size: 0.95rem; margin-top: -10px;" class="lang-text" data-en="Recommended daily exercises for your optimal recovery:" data-hi="आपके तेजी से रिकवरी के लिए अनुशंसित दैनिक व्यायाम:">Recommended daily exercises for your optimal recovery:</p>
+                    <div class="plan-content" id="exercisePlanContent"></div>
+                </div>
+            </div>
+
+            <div id="view-profile" class="section-view">
+                <div class="glass-card" style="max-width: 600px;">
+                    <h2 style="margin-top:0; color:#1e3c72;" class="lang-text" data-en="Personal Details" data-hi="व्यक्तिगत विवरण">Personal Details</h2>
+                    <div style="display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 20px;">
+                        <div style="width: 70px; height: 70px; background: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px;"><i class="fas fa-user"></i></div>
+                        <div>
+                            <h2 id="profName" style="margin:0; color:#1e3c72; text-align: left;">--</h2>
+                            <p id="profId" style="margin:5px 0 0 0; color:#64748b; font-weight:bold; text-align: left;">--</p>
+                        </div>
+                    </div>
+                    <p style="text-align: left;"><strong><span class="lang-text" data-en="Email:" data-hi="ईमेल:">Email:</span></strong> <span id="profEmail">--</span></p>
+                    <p style="text-align: left;"><strong><span class="lang-text" data-en="Age:" data-hi="उम्र:">Age:</span></strong> <span id="profAge">--</span></p>
+                    <p style="text-align: left;"><strong><span class="lang-text" data-en="Primary Condition:" data-hi="प्राथमिक रोग:">Primary Condition:</span></strong> <span id="profDisease" style="text-transform: uppercase; font-weight: bold; color: #0ea5e9;">--</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="floating-ai-btn" onclick="toggleAIChat()">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <div class="floating-chat-window" id="floatingAIChat">
+        <div class="ai-chat-header">
+            <div style="font-weight: bold; font-size: 1.1rem;"><i class="fas fa-robot"></i> MediBuddy</div>
+            <button onclick="toggleAIChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <div style="padding: 15px; background: #f8fafc; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0;">
+            Ask me about your diet, exercises, or general wellness!
+        </div>
+        <div class="chat-box" id="aiChatBox" style="background: white; border: none; border-radius: 0; margin-bottom: 0; flex: 1; height: 320px;">
+            <div class="msg ai"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">AI Assistant</strong>Hello! How can I help you feel better today?</div>
+        </div>
+        <div id="aiTyping" class="typing-indicator" style="padding: 0 15px 10px 15px; background: white;">AI is thinking...</div>
+        <div style="display: flex; gap: 10px; padding: 15px; background: white; border-top: 1px solid #e2e8f0;">
+            <input type="text" id="aiChatInput" style="margin: 0; flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;" placeholder="Ask a health question...">
+            <button class="ai-btn" onclick="sendAIMessage()" style="padding: 10px 15px;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div id="chatModal" class="modal">
+        <div class="modal-content" style="text-align: left; width: 450px;">
+            <h3 style="color:#1e3c72; margin-top:0;"><i class="fas fa-user-md"></i> <span class="lang-text" data-en="Chat with Doctor" data-hi="डॉक्टर से चैट करें">Chat with Doctor</span></h3>
+            <div class="chat-box" id="chatBox"></div>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="chatInput" style="margin: 0; flex: 1;" placeholder="Type a message...">
+                <button class="btn-update" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+            <button onclick="closeModal('chatModal')" style="width:100%; background:none; border:none; margin-top:10px; cursor:pointer; color:#64748b;"><span class="lang-text" data-en="Close" data-hi="बंद करें">Close</span></button>
+        </div>
+    </div>
+
+    <div id="updateModal" class="modal">
+        <div class="modal-content" style="text-align: left;">
+            <h3 style="color:#1e3c72; margin-top:0;" class="lang-text" data-en="Daily Health Log" data-hi="दैनिक स्वास्थ्य लॉग">Daily Health Log</h3>
+            <label class="lang-text" data-en="Blood Pressure" data-hi="रक्तचाप (BP)">Blood Pressure</label><input type="text" id="inBP" placeholder="120/80">
+            <label class="lang-text" data-en="Blood Sugar" data-hi="ब्लड शुगर">Blood Sugar</label><input type="number" id="inSugar">
+            <label class="lang-text" data-en="Heart Rate" data-hi="हृदय गति">Heart Rate</label><input type="number" id="inHR">
+            <label class="lang-text" data-en="New Symptom" data-hi="नया लक्षण">New Symptom</label><input type="text" id="inSym" placeholder="e.g. Mild headache">
+            <button style="background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width:100%; margin-top:10px; cursor: pointer;" onclick="saveVitals()"><span class="lang-text" data-en="Save & Send to Doctor" data-hi="सेव करें">Save & Send to Doctor</span></button>
+            <button onclick="closeModal('updateModal')" style="width:100%; background:none; border:none; margin-top:10px; cursor:pointer; color:#64748b;"><span class="lang-text" data-en="Close" data-hi="बंद करें">Close</span></button>
+        </div>
+    </div>
+
+    <div id="notifModal" class="modal">
+        <div class="modal-content" style="text-align: left;">
+            <h3 style="color:#1e3c72; margin-top:0; border-bottom:1px solid #e2e8f0; padding-bottom:10px;" class="lang-text" data-en="Notifications" data-hi="सूचनाएं">Notifications</h3>
+            <div id="notifListContainer" style="margin-top: 10px;"></div>
+            <button onclick="closeModal('notifModal')" style="width:100%; background:#f1f5f9; border:none; padding:10px; border-radius:8px; margin-top:15px; cursor:pointer; font-weight:bold; color:#475569;"><span class="lang-text" data-en="Close" data-hi="बंद करें">Close</span></button>
+        </div>
+    </div>
+
+    <div id="missedMedWarningModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #e11d48; margin-bottom: 15px;"></i>
+            <h2 style="color: #e11d48; margin-top: 0;" class="lang-text" data-en="Missed Medication Alert!" data-hi="छूटी हुई दवा का अलर्ट!">Missed Medication Alert!</h2>
+            <p id="missedMedWarningText" style="color: #334155; font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5;"></p>
+            <button onclick="closeModal('missedMedWarningModal')" style="background: #e11d48; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer;"><span class="lang-text" data-en="I Understand" data-hi="मैं समझ गया">I Understand</span></button>
+        </div>
+    </div>
+    
+    <div id="earlyMedWarningModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <i class="fas fa-clock" style="font-size: 50px; color: #d97706; margin-bottom: 15px;"></i>
+            <h2 style="color: #d97706; margin-top: 0;" class="lang-text" data-en="Too Early!" data-hi="बहुत जल्दी!">Too Early!</h2>
+            <p id="earlyMedWarningText" style="color: #334155; font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5;"></p>
+            <button onclick="closeModal('earlyMedWarningModal')" style="background: #d97706; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer;"><span class="lang-text" data-en="I Understand" data-hi="मैं समझ गया">I Understand</span></button>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let patientData = null;
+        let currentLang = 'en'; 
+
+        function applyLanguage() { document.querySelectorAll('.lang-text').forEach(el => { el.innerText = el.getAttribute(`data-${currentLang}`); }); }
+        function toggleLanguage() { currentLang = currentLang === 'en' ? 'hi' : 'en'; document.getElementById('langIndicator').innerText = currentLang === 'en' ? 'हिंदी' : 'English'; applyLanguage(); renderCarePlans(); }
+        function switchTab(tabId) { document.querySelectorAll('.section-view, .sidebar-item').forEach(el => { el.classList.remove('active'); }); document.getElementById('view-' + tabId).classList.add('active'); document.getElementById('tab-' + tabId).classList.add('active'); if(tabId === 'history') renderPatientCharts(); }
+        
+        // Toggle Floating AI Chat
+        function toggleAIChat() {
+            const chatWin = document.getElementById('floatingAIChat');
+            chatWin.style.display = chatWin.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function init() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if(!user) return window.location.href = 'login.html';
+            const res = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${user.email}`);
+            patientData = await res.json();
+
+            document.getElementById('welcomeName').innerText = patientData.name;
+            document.getElementById('vHR').innerHTML = `${patientData.heartRate || '--'} <span style="font-size:1rem; color:#94a3b8;">bpm</span>`;
+            document.getElementById('vBP').innerText = patientData.currentBP || '--';
+            document.getElementById('vSugar').innerHTML = `${patientData.bloodSugar || '--'} <span style="font-size:1rem; color:#94a3b8;">mg/dL</span>`;
+            document.getElementById('vHemo').innerHTML = `${patientData.hemoglobin || '--'} <span style="font-size:1rem; color:#94a3b8;">g/dL</span>`;
+
+            document.getElementById('profName').innerText = patientData.name;
+            document.getElementById('profId').innerText = `ID: ${patientData.patientId}`;
+            document.getElementById('profEmail').innerText = patientData.email;
+            document.getElementById('profAge').innerText = patientData.age || 'N/A';
+            document.getElementById('profDisease').innerText = patientData.primaryDisease || 'N/A';
+
+            if(patientData.nextAppointment) {
+                const date = new Date(patientData.nextAppointment);
+                document.getElementById('vAppt').innerHTML = date < new Date() ? `<span class="lang-text" data-en="Passed / Attended" data-hi="समय बीत गया">Passed / Attended</span>` : date.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+            } else { document.getElementById('vAppt').innerHTML = `<span class="lang-text" data-en="No upcoming appointments." data-hi="कोई आगामी नियुक्ति नहीं है।">No upcoming appointments.</span>`; }
+
+            // 🚀 MAGIC CLICKABLE LINKS APPLIED HERE
+            const notifs = patientData.notifications || [];
+            document.getElementById('notifBadge').innerText = notifs.length;
+            const notifContainer = document.getElementById('notifListContainer');
+            
+            if(notifs.length === 0) { 
+                notifContainer.innerHTML = '<p style="text-align:center; color:#94a3b8;" class="lang-text" data-en="No new notifications." data-hi="कोई नई सूचना नहीं है।">No new notifications.</p>';
+            } else { 
+                notifContainer.innerHTML = [...notifs].reverse().map(n => { 
+                    // This line converts the raw text link into a clickable HTML link
+                    let clickableMsg = n.message.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: #0ea5e9; font-weight: bold; text-decoration: underline;">$1</a>');
+                    return `<div class="notif-item"><div class="notif-icon"><i class="fas ${n.alertType === 'telemed' ? 'fa-video' : 'fa-calendar-alt'}"></i></div><div><p style="margin:0; font-size:0.9rem; color:#1e293b; white-space: pre-wrap;">${clickableMsg}</p><small style="color:#94a3b8;">${new Date(n.createdAt).toLocaleDateString()}</small></div></div>`; 
+                }).join(''); 
+            }
+
+            const meds = patientData.medicines || [];
+            const now = new Date();
+            const currentTotalMins = (now.getHours() * 60) + now.getMinutes();
+
+            document.getElementById('medicationListFull').innerHTML = meds.map((m, index) => {
+                const isTaken = localStorage.getItem(`taken_${patientData.email}_${m.name}_${now.toLocaleDateString()}`);
+                
+                let btnHtml = '';
+                if(m.time) {
+                    const [medHours, medMinutes] = m.time.split(':').map(Number);
+                    const diff = currentTotalMins - ((medHours * 60) + medMinutes);
+                    
+                    if (isTaken) {
+                        btnHtml = `<button class="btn-take-med" style="background:#10b981;" disabled><i class="fas fa-check"></i> <span class="lang-text" data-en="Taken" data-hi="लिया गया">Taken</span></button>`;
+                    } else if (diff > 30) {
+                        btnHtml = `<button class="btn-missed" disabled><i class="fas fa-times-circle"></i> <span class="lang-text" data-en="Missed" data-hi="छूट गया">Missed</span></button>`;
+                    } else {
+                        btnHtml = `<button id="btn-med-${index}" class="btn-take-med" onclick="verifyMedicineTime('${m.name}', '${m.time}', ${index})"><i class="fas fa-check-circle"></i> <span class="lang-text" data-en="Mark Taken" data-hi="लिया गया">Mark Taken</span></button>`;
+                    }
+                }
+
+                return `<div class="med-item" style="border-left-color: #d97706;"><div><strong style="color: #1e3c72; font-size:1.1rem;">${m.name}</strong><br><small style="color:#64748b; font-weight:bold;"><span class="lang-text" data-en="Take" data-hi="लें">Take</span> ${m.dosage}</small></div><div style="display:flex; align-items:center; gap:15px;"><span style="color:#d97706; font-weight:bold;"><i class="far fa-clock"></i> <span class="lang-text" data-en="Scheduled:" data-hi="निर्धारित:">Scheduled:</span> ${m.time}</span>${btnHtml}</div></div>`;
+            }).join('');
+
+            checkMedicines(meds);
+            renderCarePlans();
+            applyLanguage();
+        }
+
+        function renderCarePlans() {
+            const disease = (patientData.primaryDisease || "").toLowerCase();
+            let diet = { en: "", hi: "" };
+            let exercise = { en: "", hi: "" };
+
+            if(disease.includes("diabet") || disease.includes("sugar")) {
+                diet.en = `<span class="meal-time"><i class="fas fa-sun"></i> Morning</span><ul><li>Empty stomach: Water of soaked fenugreek (methi) seeds.</li><li>Breakfast: Oats, Dalia, or 2 boiled egg whites.</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> Afternoon</span><ul><li>Lunch: 2 Multigrain rotis, 1 bowl green vegetables, dal, and fresh salad.</li></ul><span class="meal-time"><i class="fas fa-moon"></i> Night</span><ul><li>Dinner: Light soup, grilled paneer or chicken. Eat at least 2 hours before sleeping.</li></ul>`;
+                diet.hi = `<span class="meal-time"><i class="fas fa-sun"></i> सुबह</span><ul><li>खाली पेट: भीगे हुए मेथी दाने का पानी।</li><li>नाश्ता: ओट्स, दलिया, या 2 उबले अंडे का सफेद भाग।</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> दोपहर</span><ul><li>दोपहर का भोजन: 2 मल्टीग्रेन रोटी, 1 कटोरी हरी सब्जी, दाल और ताजा सलाद।</li></ul><span class="meal-time"><i class="fas fa-moon"></i> रात</span><ul><li>रात का खाना: हल्का सूप, ग्रिल्ड पनीर या चिकन। सोने से कम से कम 2 घंटे पहले खाएं।</li></ul>`;
+                exercise.en = `<ul><li><strong>Cardio:</strong> 30 minutes of brisk walking daily.</li><li><strong>Yoga:</strong> Mandukasana (Frog Pose) and Kapalbhati Pranayama are highly effective for managing blood sugar levels.</li><li><strong>Avoid:</strong> Sitting for prolonged periods after meals.</li></ul>`;
+                exercise.hi = `<ul><li><strong>कार्डियो:</strong> रोजाना 30 मिनट की तेज सैर।</li><li><strong>योग:</strong> रक्त शर्करा को प्रबंधित करने के लिए मंडूकासन (मेंढक मुद्रा) और कपालभाति प्राणायाम अत्यधिक प्रभावी हैं।</li><li><strong>बचें:</strong> भोजन के बाद लंबे समय तक बैठने से बचें।</li></ul>`;
+            } else if(disease.includes("hyperten") || disease.includes("blood pressure") || disease.includes("bp") || disease.includes("heart")) {
+                diet.en = `<span class="meal-time"><i class="fas fa-sun"></i> Morning</span><ul><li>Empty stomach: Warm water with lemon.</li><li>Breakfast: Oatmeal with potassium-rich fruits like bananas or berries. Green tea.</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> Afternoon</span><ul><li>Lunch: Brown rice, Dal, Curd. <strong>Strictly reduce salt (sodium) intake.</strong></li></ul><span class="meal-time"><i class="fas fa-moon"></i> Night</span><ul><li>Dinner: Boiled vegetables, light khichdi. Avoid oily and junk food entirely.</li></ul>`;
+                diet.hi = `<span class="meal-time"><i class="fas fa-sun"></i> सुबह</span><ul><li>खाली पेट: नींबू के साथ गर्म पानी।</li><li>नाश्ता: केले या बेरी जैसे पोटेशियम युक्त फलों के साथ ओटमील। ग्रीन टी।</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> दोपहर</span><ul><li>दोपहर का भोजन: ब्राउन राइस, दाल, दही। <strong>नमक का सेवन सख्त कम करें।</strong></li></ul><span class="meal-time"><i class="fas fa-moon"></i> रात</span><ul><li>रात का खाना: उबली सब्जियां, हल्की खिचड़ी। तैलीय और जंक फूड से पूरी तरह बचें।</li></ul>`;
+                exercise.en = `<ul><li><strong>Cardio:</strong> Moderate aerobic exercises like light jogging, swimming, or cycling (20-30 mins).</li><li><strong>Yoga:</strong> Practice Anulom Vilom and Shavasana for stress relief and lowering heart rate.</li><li><strong>Avoid:</strong> Heavy weightlifting or extreme high-intensity interval training (HIIT).</li></ul>`;
+                exercise.hi = `<ul><li><strong>कार्डियो:</strong> हल्की जॉगिंग, तैराकी या साइकिल चलाने जैसे एरोबिक व्यायाम (20-30 मिनट)।</li><li><strong>योग:</strong> तनाव से राहत और हृदय गति को कम करने के लिए अनुलोम विलोम और शवासन का अभ्यास करें।</li><li><strong>बचें:</strong> भारी वजन उठाने या अत्यधिक उच्च तीव्रता वाले प्रशिक्षण से बचें।</li></ul>`;
+            } else if(disease.includes("asthma") || disease.includes("copd") || disease.includes("lung")) {
+                diet.en = `<span class="meal-time"><i class="fas fa-sun"></i> Morning</span><ul><li>Empty stomach: Warm water with ginger and honey.</li><li>Breakfast: Warm Poha or Upma.</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> Afternoon</span><ul><li>Lunch: Warm meals only. Include garlic and turmeric-rich dal.</li></ul><span class="meal-time"><i class="fas fa-moon"></i> Night</span><ul><li>Dinner: Turmeric milk (Haldi doodh), light vegetable stew. Avoid cold foods/drinks.</li></ul>`;
+                diet.hi = `<span class="meal-time"><i class="fas fa-sun"></i> सुबह</span><ul><li>खाली पेट: अदरक और शहद के साथ गर्म पानी।</li><li>नाश्ता: गर्म पोहा या उपमा।</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> दोपहर</span><ul><li>दोपहर का भोजन: केवल गर्म भोजन। लहसुन और हल्दी युक्त दाल शामिल करें।</li></ul><span class="meal-time"><i class="fas fa-moon"></i> रात</span><ul><li>रात का खाना: हल्दी वाला दूध, सब्जियों का स्टू। ठंडे खाद्य/पेय पदार्थों से बचें।</li></ul>`;
+                exercise.en = `<ul><li><strong>Cardio:</strong> Light indoor walking. Avoid exercising in cold, dry air or high pollution.</li><li><strong>Yoga:</strong> Bhastrika Pranayama (gentle) and Sukhasana to improve lung capacity.</li></ul>`;
+                exercise.hi = `<ul><li><strong>कार्डियो:</strong> घर के अंदर हल्की सैर। ठंडी, शुष्क हवा या उच्च प्रदूषण में व्यायाम करने से बचें।</li><li><strong>योग:</strong> फेफड़ों की क्षमता में सुधार के लिए भस्त्रिका प्राणायाम (हल्का) और सुखासन।</li></ul>`;
+            } else if(disease.includes("arthrit") || disease.includes("joint") || disease.includes("bone")) {
+                diet.en = `<span class="meal-time"><i class="fas fa-sun"></i> Morning</span><ul><li>Breakfast: Papaya, walnuts, and flaxseeds (rich in Omega-3).</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> Afternoon</span><ul><li>Lunch: Include broccoli, garlic, and ginger in your meals to reduce inflammation.</li></ul><span class="meal-time"><i class="fas fa-moon"></i> Night</span><ul><li>Dinner: Spinach soup, light roti. Avoid processed sugars which trigger joint pain.</li></ul>`;
+                diet.hi = `<span class="meal-time"><i class="fas fa-sun"></i> सुबह</span><ul><li>नाश्ता: पपीता, अखरोट, और अलसी (ओमेगा -3 से भरपूर)।</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> दोपहर</span><ul><li>दोपहर का भोजन: सूजन को कम करने के लिए अपने भोजन में ब्रोकोली, लहसुन और अदरक शामिल करें।</li></ul><span class="meal-time"><i class="fas fa-moon"></i> रात</span><ul><li>रात का खाना: पालक का सूप, हल्की रोटी। प्रसंस्कृत शर्करा से बचें जो जोड़ों के दर्द को बढ़ाते हैं।</li></ul>`;
+                exercise.en = `<ul><li><strong>Physical Activity:</strong> Aqua therapy (water aerobics) or gentle stationary cycling.</li><li><strong>Yoga:</strong> Gentle joint rotations, Trikonasana (Triangle Pose).</li><li><strong>Avoid:</strong> High-impact exercises like running or jumping.</li></ul>`;
+                exercise.hi = `<ul><li><strong>श शारीरिक गतिविधि:</strong> एक्वा थेरेपी (वाटर एरोबिक्स) या हल्की स्थिर साइकिल चलाना।</li><li><strong>योग:</strong> जोड़ों का हल्का घुमाव, त्रिकोणासन।</li><li><strong>बचें:</strong> दौड़ने या कूदने जैसे उच्च-प्रभाव वाले व्यायाम।</li></ul>`;
+            } else if(disease.includes("thyroid")) {
+                diet.en = `<span class="meal-time"><i class="fas fa-sun"></i> Morning</span><ul><li>Empty stomach: Coriander (Dhaniya) seed water.</li><li>Breakfast: Boiled eggs or nuts (Brazil nuts are great).</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> Afternoon</span><ul><li>Lunch: Brown rice, well-cooked spinach/kale. <strong>Avoid raw cruciferous veggies (cabbage/cauliflower).</strong></li></ul><span class="meal-time"><i class="fas fa-moon"></i> Night</span><ul><li>Dinner: Roasted vegetables, light chicken or tofu.</li></ul>`;
+                diet.hi = `<span class="meal-time"><i class="fas fa-sun"></i> सुबह</span><ul><li>खाली पेट: धनिया के बीज का पानी।</li><li>नाश्ता: उबले अंडे या मेवे।</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> दोपहर</span><ul><li>दोपहर का भोजन: ब्राउन राइस, अच्छी तरह पकी हुई पालक। <strong>कच्ची गोभी/फूलगोभी से बचें।</strong></li></ul><span class="meal-time"><i class="fas fa-moon"></i> रात</span><ul><li>रात का खाना: भुनी हुई सब्जियां, हल्का चिकन या टोफू।</li></ul>`;
+                exercise.en = `<ul><li><strong>Cardio:</strong> 30 minutes of moderate cardio to boost metabolism.</li><li><strong>Yoga:</strong> Ujjayi Pranayama and Matsyasana (Fish Pose) are excellent for stimulating the thyroid gland.</li></ul>`;
+                exercise.hi = `<ul><li><strong>कार्डियो:</strong> चयापचय को बढ़ावा देने के लिए 30 मिनट का मध्यम कार्डियो।</li><li><strong>योग:</strong> थायरॉयड ग्रंथि को उत्तेजित करने के लिए उज्जायी प्राणायाम और मत्स्यासन उत्कृष्ट हैं।</li></ul>`;
+            } else {
+                diet.en = `<span class="meal-time"><i class="fas fa-sun"></i> Morning</span><ul><li>Empty stomach: Warm lemon water.</li><li>Breakfast: Protein-rich breakfast (Eggs, Dal chilla, or sprouts).</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> Afternoon</span><ul><li>Lunch: A balanced plate (50% vegetables, 25% complex carbs, 25% protein).</li></ul><span class="meal-time"><i class="fas fa-moon"></i> Night</span><ul><li>Dinner: Light, easily digestible meal at least 2 hours before bed.</li></ul>`;
+                diet.hi = `<span class="meal-time"><i class="fas fa-sun"></i> सुबह</span><ul><li>खाली पेट: गर्म नींबू पानी।</li><li>नाश्ता: प्रोटीन युक्त नाश्ता (अंडे, दाल का चीला, या अंकुरित अनाज)।</li></ul><span class="meal-time"><i class="fas fa-cloud-sun"></i> दोपहर</span><ul><li>दोपहर का भोजन: एक संतुलित थाली (50% सब्जियां, 25% कार्ब्स, 25% प्रोटीन)।</li></ul><span class="meal-time"><i class="fas fa-moon"></i> रात</span><ul><li>रात का खाना: सोने से कम से कम 2 घंटे पहले हल्का, आसानी से पचने वाला भोजन।</li></ul>`;
+                exercise.en = `<ul><li><strong>Physical Activity:</strong> Stay active. Aim for at least 30 minutes of physical activity daily.</li><li><strong>Yoga:</strong> Suryanamaskar (Sun Salutation) is a complete body workout. Practice basic stretching.</li></ul>`;
+                exercise.hi = `<ul><li><strong>शारीरिक गतिविधि:</strong> सक्रिय रहें। रोजाना कम से कम 30 मिनट की शारीरिक गतिविधि का लक्ष्य रखें।</li><li><strong>योग:</strong> सूर्य नमस्कार एक संपूर्ण शारीरिक कसरत है। बुनियादी स्ट्रेचिंग का अभ्यास करें।</li></ul>`;
+            }
+
+            document.getElementById('dietPlanContent').innerHTML = currentLang === 'en' ? diet.en : diet.hi;
+            document.getElementById('exercisePlanContent').innerHTML = currentLang === 'en' ? exercise.en : exercise.hi;
+        }
+
+        function checkUpdateVitals() {
+            const todayKey = `vitals_${patientData.email}_${new Date().toLocaleDateString()}`;
+            if(localStorage.getItem(todayKey)) {
+                showToast(currentLang === 'en' ? "⚠️ You have already updated your health today!" : "⚠️ आप आज अपना स्वास्थ्य अपडेट कर चुके हैं!");
+            } else {
+                openModal('updateModal');
+            }
+        }
+
+        function checkMedicines(meds) {
+            const now = new Date(); const currentTotalMins = (now.getHours() * 60) + now.getMinutes();
+            let missedMeds = [], upcomingMeds = [];
+            meds.forEach(m => {
+                if(!m.time || localStorage.getItem(`taken_${patientData.email}_${m.name}_${now.toLocaleDateString()}`)) return;
+                const [medHours, medMinutes] = m.time.split(':').map(Number);
+                const diff = currentTotalMins - ((medHours * 60) + medMinutes);
+                if (diff > 30) missedMeds.push(m); else if (diff >= -30 && diff <= 30) upcomingMeds.push(m);
+            });
+
+            if(missedMeds.length > 0) { document.getElementById('missedMedBannerText').innerText = missedMeds.map(m => `${m.name} (${m.time})`).join(' • '); document.getElementById('missedMedBanner').style.display = 'flex'; } else { document.getElementById('missedMedBanner').style.display = 'none'; }
+            if(upcomingMeds.length > 0) { document.getElementById('upcomingMedBannerText').innerText = upcomingMeds.map(m => `${m.name} (${m.time})`).join(' • '); document.getElementById('upcomingMedBanner').style.display = 'flex'; } else { document.getElementById('upcomingMedBanner').style.display = 'none'; }
+        }
+
+        function verifyMedicineTime(medName, prescribedTimeStr, btnIndex) {
+            const now = new Date(); const diff = ((now.getHours() * 60) + now.getMinutes()) - ((prescribedTimeStr.split(':')[0] * 60) + Number(prescribedTimeStr.split(':')[1]));
+            if (diff < -30) {
+                const currentTimeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                document.getElementById('earlyMedWarningText').innerHTML = `<span class="lang-text" data-en="It is currently" data-hi="अभी समय है">It is currently</span> <strong>${currentTimeString}</strong>.<br><br><strong>${medName}</strong> <span class="lang-text" data-en="is prescribed strictly for" data-hi="का निर्धारित समय है">is prescribed strictly for</span> <strong>${prescribedTimeStr}</strong>.<br><br><span class="lang-text" data-en="It is too early to log this medication." data-hi="इस दवा को लेने के लिए अभी बहुत जल्दी है।">It is too early to log this medication.</span>`;
+                openModal('earlyMedWarningModal'); applyLanguage();
+            }
+            else if (diff > 30) {
+                document.getElementById('missedMedWarningText').innerHTML = `<span class="lang-text" data-en="You have missed the safe 30-minute window to take" data-hi="आपने दवा लेने का 30 मिनट का सुरक्षित समय गँवा दिया है:">You have missed the safe 30-minute window to take</span> <strong>${medName}</strong> (<span class="lang-text" data-en="Scheduled for" data-hi="निर्धारित">Scheduled for</span> ${prescribedTimeStr}).<br><br><span class="lang-text" data-en="Please contact your doctor to see if you should still take it." data-hi="कृपया अपने डॉक्टर से संपर्क करें और पूछें कि क्या आपको अभी भी इसे लेना चाहिए।">Please contact your doctor to see if you should still take it.</span>`;
+                openModal('missedMedWarningModal'); applyLanguage();
+            }
+            else {
+                localStorage.setItem(`taken_${patientData.email}_${medName}_${now.toLocaleDateString()}`, "true");
+                showToast('<i class="fas fa-shield-alt"></i> Medication logged safely!');
+                setTimeout(() => location.reload(), 1000); 
+            }
+        }
+
+        function openChatModal() { openModal('chatModal'); renderChat(); }
+        
+        function renderChat() {
+            const chatBox = document.getElementById('chatBox'); const history = patientData.chatHistory || [];
+            if(history.length === 0) { 
+                chatBox.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.9rem;"><span class="lang-text" data-en="Chat started with your Doctor" data-hi="आपके डॉक्टर के साथ चैट शुरू हुई">Chat started with your Doctor</span></p>'; 
+                applyLanguage(); return; 
+            }
+            chatBox.innerHTML = history.map(c => { const isPat = c.sender === 'patient'; return `<div class="msg ${isPat ? 'pat' : 'doc'}"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;"><span class="lang-text" data-en="${isPat ? 'You' : 'Doctor'}" data-hi="${isPat ? 'आप' : 'डॉक्टर'}">${isPat ? 'You' : 'Doctor'}</span> - ${c.time}</strong>${c.message}</div>`; }).join('');
+            chatBox.scrollTop = chatBox.scrollHeight; applyLanguage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput'); const text = input.value.trim(); if(!text) return;
+            const freshRes = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${patientData.email}`);
+            const freshData = await freshRes.json();
+            const newMsg = { sender: 'patient', message: text, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+            const updatedHistory = [...(freshData.chatHistory || []), newMsg];
+            const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${patientData.email}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chatHistory: updatedHistory }) });
+            if(res.ok) { patientData.chatHistory = updatedHistory; input.value = ''; renderChat(); }
+        }
+
+        // 🚀 UPDATED AI CHAT FUNCTION (For Floating Widget)
+        async function sendAIMessage() {
+            const input = document.getElementById('aiChatInput'); 
+            const text = input.value.trim(); 
+            if(!text) return;
+
+            const chatBox = document.getElementById('aiChatBox');
+            
+            chatBox.innerHTML += `<div class="msg pat" style="background: #1e3c72;"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">You</strong>${text}</div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            document.getElementById('aiTyping').style.display = 'block';
+
+            try {
+                const response = await fetch('https://nextstep-care.onrender.com/api/patients/ai-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: text, 
+                        patientDisease: patientData.primaryDisease 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('aiTyping').style.display = 'none';
+                chatBox.innerHTML += `<div class="msg ai"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">AI Assistant</strong>${data.reply}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch(e) {
+                document.getElementById('aiTyping').style.display = 'none';
+                alert("Error connecting to AI Assistant.");
+            }
+        }
+
+        setInterval(async () => {
+            if(document.getElementById('chatModal').style.display === 'flex') {
+                const freshRes = await fetch(`https://nextstep-care.onrender.com/api/patients/me/${patientData.email}`);
+                const freshData = await freshRes.json();
+                if (freshData.chatHistory && freshData.chatHistory.length !== (patientData.chatHistory || []).length) {
+                    patientData.chatHistory = freshData.chatHistory; renderChat();
+                }
+            }
+        }, 3000);
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        async function saveVitals() {
+            const bp = document.getElementById('inBP').value, sugar = document.getElementById('inSugar').value, hr = document.getElementById('inHR').value, sym = document.getElementById('inSym').value;
+            let updatedSymptoms = sym ? [sym] : []; 
+            const res = await fetch(`https://nextstep-care.onrender.com/api/patients/update/${patientData.email}`, { 
+                method: 'PUT', headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ currentBP: bp, bloodSugar: sugar, heartRate: hr, symptoms: updatedSymptoms }) 
+            });
+            if(res.ok) { 
+                const todayKey = `vitals_${patientData.email}_${new Date().toLocaleDateString()}`;
+                localStorage.setItem(todayKey, "true");
+                showToast(currentLang === 'en' ? "Vitals Updated Successfully!" : "विवरण सफलतापूर्वक अपडेट हो गए!"); 
+                setTimeout(() => location.reload(), 1500); 
+            }
+        }
+
+        let pCharts = { hr: null, bp: null, sugar: null, hemo: null };
+        function renderPatientCharts() {
+            const history = patientData.historicalVitals || []; if(history.length === 0) return;
+            if(pCharts.hr) pCharts.hr.destroy(); if(pCharts.bp) pCharts.bp.destroy(); if(pCharts.sugar) pCharts.sugar.destroy(); if(pCharts.hemo) pCharts.hemo.destroy();
+            const dates = history.map(v => v.date); const opts = { maintainAspectRatio: false, plugins: { legend: { display: false } } };
+            pCharts.hr = new Chart(document.getElementById('pChartHR').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ data: history.map(v => v.heartRate), borderColor: '#0ea5e9', tension: 0.4 }]}, options: opts });
+            pCharts.bp = new Chart(document.getElementById('pChartBP').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ data: history.map(v => v.systolic), borderColor: '#e11d48', tension: 0.4 }, { data: history.map(v => v.diastolic), borderColor: '#d97706', borderDash: [5,5], tension: 0.4 }]}, options: opts });
+            pCharts.sugar = new Chart(document.getElementById('pChartSugar').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ data: history.map(v => v.sugar), borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.1)', fill: true, tension: 0.4 }]}, options: opts });
+            pCharts.hemo = new Chart(document.getElementById('pChartHemo').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ data: history.map(v => v.hemoglobin), borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.4 }]}, options: opts });
+        }
+        function showToast(msg) { const t = document.getElementById('toast'); t.innerHTML = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 4000); }
+        function handleLogout() { localStorage.removeItem('currentUser'); window.location.href = 'login.html'; }
+        window.onload = init;
+    </script>
+</body>
+</html>

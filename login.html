@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextStep Care - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Light Sky Theme with White Glassmorphism (YOUR EXACT CSS) */
+        body { 
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); 
+            min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; 
+            font-family: 'Inter', sans-serif;
+        }
+        .login-container { width: 100%; padding: 20px; display: flex; justify-content: center; }
+        
+        .login-box {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 40px; border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(30, 60, 114, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8); 
+            width: 100%; max-width: 400px; text-align: center;
+        }
+        
+        .logo img { max-width: 80px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05)); }
+        .logo h1 { color: #1e3c72; font-size: 1.8rem; margin-top: 15px; margin-bottom: 5px; font-weight: 700; }
+        .logo p { color: #475569; font-size: 0.95rem; margin-bottom: 30px; font-weight: 400; }
+        
+        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; color: #334155; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; }
+        .input-group i { position: absolute; left: 16px; top: 16px; color: #94a3b8; font-size: 1.1rem; }
+        .input-group.has-label i { top: 41px; } 
+        
+        .input-group input, .input-group select {
+            width: 100%; padding: 14px 14px 14px 45px;
+            background: rgba(255, 255, 255, 0.9); 
+            border: 1px solid rgba(30, 60, 114, 0.15); border-radius: 12px;
+            color: #1e293b; font-size: 15px; transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        .input-group select { padding-left: 45px; cursor: pointer; } 
+        .input-group select option { background: #ffffff; color: #1e293b; } 
+        
+        .input-group input:focus, .input-group select:focus { 
+            border-color: #38bdf8; outline: none; background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+        .input-group input::placeholder { color: #94a3b8; }
+        
+        button[type="submit"] {
+            width: 100%; padding: 15px; 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: #ffffff;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease; margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.2);
+        }
+        button[type="submit"]:hover { 
+            transform: translateY(-2px); box-shadow: 0 6px 20px rgba(30, 60, 114, 0.3); background: #1e3c72;
+        }
+        
+        .links { margin-top: 25px; }
+        .links a { color: #0284c7; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+        .links a:hover { color: #1e3c72; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <img src="logo.png" alt="Company Logo">
+                <h1>NextStep-Care</h1>
+                <p>Sign in to your account</p>
+            </div>
+            <form id="loginForm">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Email Address" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <div class="input-group has-label">
+                    <label>Login As:</label>
+                    <i class="fas fa-user-tag"></i>
+                    <select id="userType">
+                        <option value="doctor">Doctor</option>
+                        <option value="patient">Patient</option>
+                    </select>
+                </div>
+                <button type="submit">Login <i class="fas fa-sign-in-alt" style="margin-left: 5px;"></i></button>
+            </form>
+            <div class="links">
+                <a href="register.html">Create a New Account</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+
+            // 1. Grab Email, Password, AND Role!
+            const emailInput = document.getElementById('email').value;
+            const passwordInput = document.getElementById('password').value;
+            const roleInput = document.getElementById('userType').value;
+
+            try {
+                // 2. Send all three to the backend
+                const response = await fetch('https://nextstep-care.onrender.com/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: emailInput, 
+                        password: passwordInput,
+                        role: roleInput // Tells the backend who is logging in!
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // ✅ SUCCESS! 
+                    
+                    // 3. Save the details to memory (including the crucial EMAIL)
+                    const userObj = {
+                        name: data.name || data.user?.name || "User",
+                        role: data.role || roleInput,
+                        assignedId: data.patientId || data.doctorId || data.user?.id || data._id,
+                        email: emailInput // This prevents the Patient Dashboard "undefined" crash!
+                    };
+
+                    localStorage.setItem('currentUser', JSON.stringify(userObj));
+
+                    // 4. Redirect based on the dropdown choice
+                    if (userObj.role === 'patient') {
+                        window.location.href = 'patient-dashboard.html';
+                    } else {
+                        window.location.href = 'doctor-dashboard.html';
+                    }
+
+                } else {
+                    // ❌ FAILED (Wrong password, wrong role, etc.)
+                    alert("❌ Login Failed: " + (data.message || "Invalid credentials"));
+                }
+
+            } catch (error) {
+                console.error("Login Crash:", error);
+                alert("🚨 Request Failed! Make sure node server.js is running.");
+            }
+        });
+    </script>
+</body>
+</html>
