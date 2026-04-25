@@ -19,25 +19,53 @@
         <button onclick="verifyAccount()">Verify & Register</button>
     </div>
 
-    <script>
-        async function verifyAccount() {
+   <script>
+    async function verifyAccount() {
+        try {
+            // 1. Grab the email saved during registration
             const email = localStorage.getItem('emailToVerify');
+            
+            // SAFETY CHECK: Did the user lose their session?
+            if (!email) {
+                alert("⚠️ Error: Email session lost. Please try registering again.");
+                window.location.href = 'register.html';
+                return;
+            }
+
+            // 2. Grab the OTP typed by the user
             const otp = document.getElementById('otpCode').value;
 
-            const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+            // SAFETY CHECK: Is the box empty?
+            if (!otp) {
+                alert("⚠️ Please enter the 6-digit code.");
+                return;
+            }
+
+            // 3. Send to backend
+            const response = await fetch('/api/auth/verify-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, otp })
             });
 
+            // 4. Read the response
             const data = await response.json();
+
             if (response.ok) {
-                alert(`Account Verified! Your ID: ${data.assignedId}`);
+                alert(`✅ Account Verified! Welcome to NextStep-Care.`);
+                // Clean up the storage so it doesn't get stuck
+                localStorage.removeItem('emailToVerify'); 
                 window.location.href = 'login.html';
             } else {
-                alert(data.message);
+                alert(`❌ Verification Failed: ${data.message || "Invalid OTP"}`);
             }
+            
+        } catch (err) {
+            // This catches major crashes (like the server being offline)
+            console.error("Verification Error:", err);
+            alert("❌ Server error. Please check your internet connection or the developer console.");
         }
-    </script>
+    }
+</script>
 </body>
 </html>
