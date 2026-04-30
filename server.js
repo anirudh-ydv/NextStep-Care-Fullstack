@@ -17,8 +17,8 @@ app.use(express.json());
 // ==========================================
 // SERVE FRONTEND (Monorepo Setup)
 // ==========================================
-// This tells Node to serve the HTML, CSS, and JS files from this exact folder
-app.use(express.static(__dirname)); 
+// Tell Express to look inside the 'frontend' folder for HTML/CSS/JS
+app.use(express.static(path.join(__dirname, 'frontend'))); 
 
 // ==========================================
 // 🚨 THE DATABASE ENGINE 
@@ -36,10 +36,10 @@ app.use('/api/patients', patientRoutes);
 // ==========================================
 // CATCH-ALL ROUTE (Express 5 Compatible Fix)
 // ==========================================
-// If someone types a random URL, send them back to the main website
+// If someone types a random URL, send them back to the main website inside the frontend folder
 // (Using app.use without a path bypasses the strict Express 5 wildcard rules)
 app.use((req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
 
 // ==========================================
