@@ -232,16 +232,46 @@ th { color: #6b7280; font-weight: 500; font-size: 0.9rem; }
 .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;}
 .login-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center;}
 
+/* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
-    .dashboard-container { flex-direction: column; }
-    .sidebar {
-        width: 100%; border-right: none; border-bottom: 1px solid #eaeaea;
-        position: sticky; top: 60px; z-index: 90;
-    }
+    /* From your first block */
     .sidebar ul { display: flex; overflow-x: auto; padding: 0; margin: 0; }
-    .sidebar a {
-        padding: 15px; font-size: 0.85rem; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap;
-    }
+    .sidebar a { padding: 15px; font-size: 0.85rem; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; }
     .sidebar a.active { border-left: none; border-bottom-color: #0056b3; background: transparent; }
     .form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+    /* Stack the sidebar and main content vertically */
+    body {
+        flex-direction: column;
+        overflow: auto;
+        height: auto;
+    }
+
+    /* Make the sidebar stretch across the top */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #d1e8f5;
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-top: 10px;
+    }
+
+    /* Make sidebar items sit side-by-side on top */
+    .sidebar-item {
+        display: inline-block;
+        padding: 10px 15px;
+    }
+
+    /* Fix the header and grids for small screens */
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    .vital-grid, .charts-grid {
+        grid-template-columns: 1fr; 
+    }
 }
