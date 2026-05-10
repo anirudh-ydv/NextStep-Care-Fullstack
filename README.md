@@ -65,9 +65,3 @@ We didn't just build a dashboard; we built a **Continuous Care Bridge**.
 * **SDG 10 (Reduced Inequalities):** Providing "private-care" level follow-up to vulnerable populations through affordable AI.
 
 ---
-
-## 🛠️ Setup & Installation
-1. **Clone:** `git clone https://github.com/anirudh-ydv/NextStep-Care-Fullstack.git`
-2. **Install:** `npm install`
-3. **Configure:** Add `MONGO_URI`, `GEMINI_API_KEY`, `EMAIL_USER`, and `EMAIL_PASS` to your `.env`.
-4. **Launch:** `node server.js`
