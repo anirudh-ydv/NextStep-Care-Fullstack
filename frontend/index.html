@@ -62,6 +62,18 @@
 
         /* Footer */
         .footer { text-align: center; padding: 30px; background: #0f172a; color: #64748b; font-size: 0.9rem; }
+        /* --- 📱 MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; padding: 15px; gap: 15px; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 15px; }
+            .hero { flex-direction: column; padding: 40px 20px; text-align: center; }
+            .hero-text { max-width: 100%; margin-bottom: 40px; }
+            .hero-text h1 { font-size: 2.5rem; }
+            .hero-image { max-width: 100%; }
+            .btn-group { justify-content: center; flex-wrap: wrap; }
+            .features { padding: 40px 20px; }
+            .team { padding: 40px 20px; }
+        }
     </style>
 </head>
 <body>

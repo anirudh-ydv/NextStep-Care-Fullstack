@@ -54,6 +54,18 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 16px; width: 350px; }
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 15px 30px; border-radius: 50px; display: none; z-index: 3000; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        /* --- 📱 MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 10px; text-align: center; }
+            .header-card { flex-direction: column; text-align: center; gap: 15px; }
+            .header-meta { flex-direction: column; gap: 5px; }
+            .vital-grid { grid-template-columns: 1fr; }
+            .charts-grid-doc { grid-template-columns: 1fr; }
+            .tab-nav { overflow-x: auto; white-space: nowrap; padding-bottom: 10px; }
+            .add-med-form { flex-direction: column; align-items: stretch; }
+            .btn-add { width: 100%; }
+        }
     </style>
 </head>
 <body>

@@ -130,6 +130,22 @@
             justify-content: space-between;
             align-items: center;
         }
+        /* --- 📱 MOBILE RESPONSIVENESS FOR PATIENT DASHBOARD --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #d1e8f5; display: flex; overflow-x: auto; white-space: nowrap; padding-top: 10px; }
+            .sidebar-item { display: inline-block; padding: 10px 15px; }
+            .header { flex-direction: column; gap: 15px; text-align: center; }
+            .header-actions { flex-wrap: wrap; justify-content: center; }
+            .dashboard-container { padding: 15px; }
+            .vital-grid, .charts-grid { grid-template-columns: 1fr; }
+            .glass-card { flex-direction: column; align-items: stretch !important; gap: 15px; }
+            .dashboard-top-area { flex-direction: column; }
+            
+            /* Fix floating AI chat box on small screens */
+            .floating-chat-window { width: 90%; right: 5%; bottom: 100px; max-height: 70vh; }
+            .modal-content { width: 90%; padding: 20px; }
+        }
     </style>
 </head>
 <body>

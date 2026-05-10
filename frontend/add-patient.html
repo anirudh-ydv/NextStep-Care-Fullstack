@@ -20,6 +20,14 @@
         button#addMedicine { background: rgba(255, 255, 255, 0.8); color: #1e3c72; border: 1px dashed #1e3c72; width: 100%; margin-bottom: 30px;}
         .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
         .back-btn { background: white; color: #1e3c72; border: 1px solid #1e3c72; padding: 8px 15px; border-radius: 10px; text-decoration: none; font-weight: 600; }
+        
+        /* --- 📱 MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .medicine-entry { flex-direction: column; }
+            .navbar { flex-direction: column; gap: 15px; text-align: center; }
+            .form-container { padding: 20px; margin: 0 15px; }
+        }
     </style>
 </head>
 <body>
