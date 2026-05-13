@@ -166,7 +166,7 @@ Integrated secure video consultations using **Jitsi Meet** enable immediate doct
 ### 🖥️ Frontend
 - HTML5
 - CSS3
-- Vanilla JavaScript
+- JavaScript
 - Glassmorphism UI
 - Fully Responsive Design
 
