@@ -77,3 +77,15 @@ We didn't just build a dashboard; we built a **Continuous Care Bridge**.
 * **SDG 10 (Reduced Inequalities):** Providing "private-care" level follow-up to vulnerable populations through affordable AI.
 
 ---
+
+## 🔐 Environment Variables
+To run this project locally, create a `.env` file in the root directory and add:
+`MONGO_URI=` (Your MongoDB connection string)
+`GEMINI_API_KEY=` (Your Google Gemini 1.5 Flash API Key)
+
+## 🛠️ Local Installation & Setup
+1. **Clone the repository:** `git clone https://github.com/anirudh-ydv/NextStep-Care-Fullstack.git`
+2. **Navigate to the directory:** `cd NextStep-Care-Fullstack`
+3. **Install dependencies:** `npm install`
+4. **Start the server:** `node server.js`
+   *(Access the app at http://localhost:5000)*
