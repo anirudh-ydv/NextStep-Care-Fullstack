@@ -40,14 +40,18 @@ We didn't just build a dashboard; we built a **Continuous Care Bridge**.
 
 
 #### **🤖 AI Medical Assistant (MediBuddy):**
-* **Context-Aware Guidance:** Powered by **Google Gemini**, the AI analyzes specific conditions to provide personalized recovery advice.
+* **Context-Aware Guidance:** Powered by Google Gemini, the AI analyzes specific conditions to provide personalized recovery advice.
+* **Multimodal Computer Vision:** Patients can securely upload images of physical symptoms or confusing prescription labels for objective visual analysis and instant guidance.
 * **Red-Flag Detection:** Automatically recognizes "danger signs" and instructs patients to seek immediate medical help.
 * **24/7 Availability:** Bridges the gap when doctors are unavailable, reducing patient anxiety.
 
+  
 #### **🩺 Physician Command Center**
 * **Unified Patient Oversight:** Doctors monitor an entire ward of discharged patients from a single view.
+* **AI Predictive Triage:** A built-in risk assessment tool that processes a patient's historical vitals to instantly output actionable clinical insights and risk levels (Low/Medium/Critical).
 * **Smart Vitals Monitoring:** Real-time tracking of BP, Blood Sugar, and Hemoglobin with color-coded "Critical Status" alerts.
-* **Digital Prescriptions:** issue and update medication plans that sync instantly to the patient’s dashboard.
+* **Digital Prescriptions:** Issue and update medication plans that sync instantly to the patient's dashboard.
+
 
 #### **📱 Patient Recovery Hub**
 * **Medication Adherence Tracker:** Interactive checklist for daily prescriptions to ensure zero missed doses.
@@ -62,7 +66,7 @@ We didn't just build a dashboard; we built a **Continuous Care Bridge**.
 ## 🛠️ Technical Innovation (Monorepo Architecture)
 * **Backend:** Node.js & Express (Scalable API design)
 * **Frontend:** Responsive Vanilla JS & CSS (Glassmorphism UI, Zero-dependency)
-* **Intelligence:** Google Gemini API (NLP for medical triage)
+* **Intelligence:** Google Gemini 1.5 Flash API (Multimodal: NLP + Computer Vision for medical triage and visual analysis)
 * **Database:** MongoDB Atlas (Cloud-native NoSQL)
 * **Security:** Automated 6-digit Email OTP Verification & Role-Based Access Control (RBAC)
 
