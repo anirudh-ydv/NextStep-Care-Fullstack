@@ -161,14 +161,21 @@ Integrated secure video consultations using **Jitsi Meet** enable immediate doct
 
 # 🏗️ Technical Architecture
 
-## ⚙️ Full-Stack Monorepo Architecture
-
+### ⚙️ Full-Stack Monorepo Architecture
+         
 ### 🖥️ Frontend
 - HTML5
 - CSS3
 - JavaScript
 - Glassmorphism UI
 - Fully Responsive Design
+  ```mermaid
+                      graph TD
+    Client[Frontend: JS + Glassmorphism UI] <-->|REST API / JSON| Server[Backend: Node.js & Express]
+    Server <-->|Read/Write Patient Vitals| DB[(MongoDB Atlas Cloud)]
+    Server <-->|Multimodal Prompts| AI[Google Gemini 1.5 Flash API]
+    Server -->|Email OTP Auth| Email[Nodemailer Integration]
+    Server -->|Hosting| Deploy[Render CI/CD]
 
 ### 🧠 AI Layer
 - Google Gemini 1.5 Flash API
@@ -189,7 +196,7 @@ Integrated secure video consultations using **Jitsi Meet** enable immediate doct
 ### 🚀 Deployment
 - Render Cloud Deployment
 - Git Version Control
-
+   
 ---
 
 # 🔐 Security Features
