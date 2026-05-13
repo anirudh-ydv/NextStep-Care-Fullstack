@@ -29,9 +29,17 @@ Every year, millions of patients are discharged with complex recovery plans, but
 ## 💡 Our Solution: NextStep-Care
 We didn't just build a dashboard; we built a **Continuous Care Bridge**.
 
-### **🚀 Key Product Features**
 
-#### **🤖 ASI:One AI Triage Engine**
+### **🚀 Key Features & Technical Highlights**
+
+* **📱 Fully Responsive Custom UI:** Designed a complete Glassmorphism interface from scratch using vanilla CSS and targeted `@media` queries. The platform perfectly adapts to mobile, tablet, and desktop views without relying on heavy frameworks like Bootstrap or Tailwind.
+* **🤖 AI Medical Assistant (MediBuddy):** Integrated Google's Gemini AI to provide a 24/7 floating chat widget that gives personalized, disease-specific diet and wellness advice based on the patient's active diagnosis.
+* **📊 Dynamic Vitals Analytics:** Utilized Chart.js to render real-time, interactive, and shaded graphical charts, allowing doctors to instantly visualize trends in Blood Pressure, Heart Rate, and Blood Sugar.
+* **📹 1-Click Telemedicine:** Built-in automated video consultation link generation using secure, no-download Jitsi integration.
+* **🌍 Bilingual Accessibility:** Engineered a dynamic language-toggle system allowing patients to instantly switch their dashboard between English and Hindi.
+
+
+#### **🤖 AI Medical Assistant (MediBuddy):**
 * **Context-Aware Guidance:** Powered by **Google Gemini**, the AI analyzes specific conditions to provide personalized recovery advice.
 * **Red-Flag Detection:** Automatically recognizes "danger signs" and instructs patients to seek immediate medical help.
 * **24/7 Availability:** Bridges the gap when doctors are unavailable, reducing patient anxiety.
