@@ -20,6 +20,8 @@
         .logo-area { display: flex; align-items: center; font-size: 1.5rem; font-weight: bold; color: #1e3c72; }
         .user-area { display: flex; align-items: center; gap: 20px; font-weight: 600; color: #1e293b; }
         .btn-logout { background: #e11d48; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-main { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;}
+        .btn-main:hover { opacity: 0.9; transform: translateY(-2px); }
         
         .dashboard-container { padding: 40px; }
         .section-view { display: none; } 
@@ -137,6 +139,17 @@
                 <div id="analyticsEmptyState" style="text-align: center; padding: 60px; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
                     <i class="fas fa-user-md" style="font-size: 60px; color: #cbd5e1; margin-bottom: 20px;"></i>
                     <h3 style="color: #64748b; margin: 0;">Select a patient from the dropdown to view their recovery trends.</h3>
+                </div>
+
+                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px;">
+                    <button id="runTriageBtn" class="btn-main" style="display:none; background: linear-gradient(135deg, #8b5cf6, #3b82f6); border: none;" onclick="runAIPrediction()">
+                        <i class="fas fa-brain"></i> Run AI Predictive Triage
+                    </button>
+                </div>
+                
+                <div id="aiTriageResult" style="display:none; background: #f8fafc; border: 2px solid #8b5cf6; padding: 20px; border-radius: 15px; margin-bottom: 25px;">
+                    <h3 style="margin-top:0; color:#8b5cf6;"><i class="fas fa-robot"></i> Gemini AI Risk Assessment</h3>
+                    <p id="aiTriageText" style="color: #334155; line-height: 1.6; margin: 0;">Analyzing trends...</p>
                 </div>
 
                 <div id="analyticsChartsGrid" style="display: none; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -286,14 +299,19 @@
         document.getElementById('filterStatus').addEventListener('change', renderPatientTable);
         document.getElementById('filterDisease').addEventListener('change', renderPatientTable);
 
+        // 🚀 UPDATED: Logic to show/hide AI Triage Button
         document.getElementById('analyticsPatientSelect').addEventListener('change', async function() {
             const email = this.value;
             const grid = document.getElementById('analyticsChartsGrid');
             const emptyState = document.getElementById('analyticsEmptyState');
+            const triageBtn = document.getElementById('runTriageBtn');
+            const triageResult = document.getElementById('aiTriageResult');
 
             if (!email) {
                 grid.style.display = 'none';
                 emptyState.style.display = 'block';
+                triageBtn.style.display = 'none';
+                triageResult.style.display = 'none';
                 return;
             }
 
@@ -302,9 +320,37 @@
                 const patient = await res.json();
                 emptyState.style.display = 'none';
                 grid.style.display = 'grid';
+                triageBtn.style.display = 'flex'; // Show AI button
+                triageResult.style.display = 'none'; // Hide old AI result
                 renderAnalyticsCharts(patient);
             } catch (err) { console.error(err); }
         });
+
+        // 🚀 NEW: AI Predictive Triage Function
+        async function runAIPrediction() {
+            const email = document.getElementById('analyticsPatientSelect').value;
+            if(!email) return;
+
+            document.getElementById('aiTriageResult').style.display = 'block';
+            document.getElementById('aiTriageText').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gemini is analyzing the patient\'s historical vitals...';
+
+            try {
+                const response = await fetch(`/api/patients/ai-predictive-triage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                // Display the AI's analysis
+                document.getElementById('aiTriageText').innerHTML = `<strong>Assessment:</strong> ${data.analysis}`;
+                
+            } catch (err) {
+                document.getElementById('aiTriageText').innerText = "Error running AI triage. Please ensure your backend is configured.";
+                console.error(err);
+            }
+        }
 
         function renderAnalyticsCharts(p) {
             const history = p.historicalVitals || [];

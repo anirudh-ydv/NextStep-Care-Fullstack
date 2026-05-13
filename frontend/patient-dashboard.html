@@ -299,9 +299,19 @@
             <div class="msg ai"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">AI Assistant</strong>Hello! How can I help you feel better today?</div>
         </div>
         <div id="aiTyping" class="typing-indicator" style="padding: 0 15px 10px 15px; background: white;">AI is thinking...</div>
-        <div style="display: flex; gap: 10px; padding: 15px; background: white; border-top: 1px solid #e2e8f0;">
-            <input type="text" id="aiChatInput" style="margin: 0; flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;" placeholder="Ask a health question...">
+        
+        <div style="display: flex; gap: 10px; padding: 15px; background: white; border-top: 1px solid #e2e8f0; align-items: center;">
+            <input type="file" id="aiImageInput" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
+            
+            <button class="icon-btn" onclick="document.getElementById('aiImageInput').click()" style="background: #e0f2fe; color: #0284c7; width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fas fa-camera"></i>
+            </button>
+            
+            <input type="text" id="aiChatInput" style="margin: 0; flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;" placeholder="Ask or upload an image...">
             <button class="ai-btn" onclick="sendAIMessage()" style="padding: 10px 15px;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div id="imagePreviewContainer" style="display: none; padding: 0 15px 10px; background: white;">
+            <span style="font-size: 0.8rem; color: #10b981; font-weight: bold;"><i class="fas fa-image"></i> Image attached & ready to send!</span>
         </div>
     </div>
 
@@ -542,16 +552,35 @@
             if(res.ok) { patientData.chatHistory = updatedHistory; input.value = ''; renderChat(); }
         }
 
-        // 🚀 UPDATED AI CHAT FUNCTION (For Floating Widget)
+        // 🚀 UPGRADED AI CHAT LOGIC (Handles Images for Computer Vision)
+        let currentBase64Image = null;
+
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                currentBase64Image = reader.result; 
+                document.getElementById('imagePreviewContainer').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function sendAIMessage() {
             const input = document.getElementById('aiChatInput'); 
             const text = input.value.trim(); 
-            if(!text) return;
+            if(!text && !currentBase64Image) return;
 
             const chatBox = document.getElementById('aiChatBox');
             
-            chatBox.innerHTML += `<div class="msg pat" style="background: #1e3c72;"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">You</strong>${text}</div>`;
+            let userMsgHtml = text || "Uploaded an image for analysis.";
+            if(currentBase64Image) userMsgHtml += `<br><i class="fas fa-camera" style="color:#94a3b8; margin-top:5px;"></i> <span style="font-size:0.8rem;">[Image Attached]</span>`;
+            
+            chatBox.innerHTML += `<div class="msg pat" style="background: #1e3c72;"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">You</strong>${userMsgHtml}</div>`;
+            
             input.value = '';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
             chatBox.scrollTop = chatBox.scrollHeight;
 
             document.getElementById('aiTyping').style.display = 'block';
@@ -561,12 +590,16 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        message: text, 
-                        patientDisease: patientData.primaryDisease 
+                        message: text || "Analyze this medical image.", 
+                        patientDisease: patientData.primaryDisease,
+                        image: currentBase64Image 
                     })
                 });
                 
                 const data = await response.json();
+                
+                currentBase64Image = null;
+                document.getElementById('aiImageInput').value = '';
                 
                 document.getElementById('aiTyping').style.display = 'none';
                 chatBox.innerHTML += `<div class="msg ai"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">AI Assistant</strong>${data.reply}</div>`;
