@@ -307,17 +307,6 @@ Future scalability includes:
 
 ---
 
-# 🛠️ Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-MONGO_URI=your_mongodb_connection_string
-GEMINI_API_KEY=your_google_gemini_api_key
-JWT_SECRET=your_jwt_secret
-EMAIL_USER=your_email
-<<<<<<< HEAD
-EMAIL_PASS=your_email_password
 =======
 EMAIL_PASS=your_email_password
 >>>>>>> cdc25c3677cc86a4f3746b2bf61c58aece832fd1
