@@ -306,7 +306,3 @@ Future scalability includes:
 
 
 ---
-
-=======
-EMAIL_PASS=your_email_password
->>>>>>> cdc25c3677cc86a4f3746b2bf61c58aece832fd1
