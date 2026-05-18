@@ -5,11 +5,35 @@
     <title>Add Patient - NextStep Care</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
-    <link rel="stylesheet" href="stylo.css">
+     <style>
+        body { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); font-family: 'Inter', sans-serif; min-height: 100vh; margin: 0; padding-bottom: 40px; }
+        .navbar { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px;}
+        .nav-brand { color: #1e3c72; font-weight: 700; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;}
+        .form-container { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); padding: 40px; border-radius: 24px; max-width: 900px; margin: 0 auto; box-shadow: 0 15px 35px rgba(0,0,0,0.08);}
+        h2, h3 { color: #1e3c72; }
+        label { color: #334155; font-weight: 600; margin-bottom: 8px; display: block; }
+        input, select { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(30, 60, 114, 0.15); padding: 14px; width: 100%; border-radius: 12px; box-sizing: border-box; }
+        input:focus, select:focus { border-color: #38bdf8; outline: none; }
+        .medicine-entry { background: rgba(255, 255, 255, 0.5); padding: 20px; border-radius: 16px; margin-bottom: 15px; display: flex; gap: 15px; }
+        .medicine-entry input { flex: 1; }
+        button { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; padding: 15px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        button.remove-medicine { background: #e11d48; padding: 14px 20px; flex: none; }
+        button#addMedicine { background: rgba(255, 255, 255, 0.8); color: #1e3c72; border: 1px dashed #1e3c72; width: 100%; margin-bottom: 30px;}
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .back-btn { background: white; color: #1e3c72; border: 1px solid #1e3c72; padding: 8px 15px; border-radius: 10px; text-decoration: none; font-weight: 600; }
+        
+        /* --- 📱 MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .medicine-entry { flex-direction: column; }
+            .navbar { flex-direction: column; gap: 15px; text-align: center; }
+            .form-container { padding: 20px; margin: 0 15px; }
+        }
+    </style>
 </head>
-<body class="add-patient-body">
-    <nav class="add-patient-navbar">
-        <div class="nav-brand"><img src="logo.png" alt="Company Logo" onerror="this.src='https://via.placeholder.com/40?text=🏥'" style="max-width:40px; height:auto; margin-right: 10px;"> NextStep-Care</div>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><img src="logo.png" alt="Company Logo" style="max-width:18%; height:18%; margin-right: 10px;"> NextStep-Care</div>
         <div style="display: flex; align-items: center; gap: 15px;">
             <span id="doctorName" style="font-weight: 600; color: #1e293b;">Dr. Loading...</span>
             <a href="doctor-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
@@ -23,6 +47,7 @@
                 <div class="input-group"><label>Name</label><input type="text" id="patientName" required></div>
                 <div class="input-group"><label>Patient ID</label><input type="text" id="patientId" required></div>
                 <div class="input-group"><label>Email (For Portal Login)</label><input type="email" id="patientEmail" required></div>
+                
                 
                 <div class="input-group"><label>Age</label><input type="number" id="age" required></div>
                 <div class="input-group"><label>Gender</label><select id="gender" required><option>Male</option><option>Female</option><option>Other</option></select></div>
@@ -69,7 +94,7 @@
                 <div class="input-group"><label>Next Appointment Date</label><input type="date" id="nextAppointment" required></div>
                 <div class="input-group"><label>Status</label><select id="healthStatus" required><option value="stable">Stable</option><option value="moderate">Moderate</option><option value="critical">Critical</option></select></div>
             </div>
-            <button type="submit" class="save-patient-btn"><i class="fas fa-save"></i> Save Patient Record</button>
+            <button type="submit" style="width: 100%; margin-top: 20px;"><i class="fas fa-save"></i> Save Patient Record</button>
         </form>
     </div>
 
