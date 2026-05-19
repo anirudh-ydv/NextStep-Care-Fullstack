@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); 
 const nodemailer = require('nodemailer'); 
+const bcrypt = require('bcryptjs');
 
 // ==========================================
 // EMAIL ENGINE SETUP (The Postman)
@@ -31,17 +32,19 @@ router.post('/register', async (req, res) => {
         const newUser = new User({
             name,
             email,
-            password, 
+            password: await bcrypt.hash(password, 10), 
             role,
             specialization: specialization || "Not Specified",
             patientId: role === 'patient' ? `PAT-${Math.floor(Math.random() * 10000)}` : null,
             doctorId: role === 'doctor' ? `DOC-${Math.floor(Math.random() * 10000)}` : null
         });
 
-        await newUser.save();
-
-        // 🚨 GENERATE A 6-DIGIT CODE
+       // 🚨 GENERATE A 6-DIGIT CODE
         const verificationCode = Math.floor(100000 + Math.random() * 900000);
+        newUser.otp = verificationCode.toString();
+        newUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // expires in 10 mins
+
+        await newUser.save();
 
         // 🚨 SEND THE OTP EMAIL
         const mailOptions = {
@@ -76,8 +79,14 @@ router.post('/login', async (req, res) => {
         const { email, password, role } = req.body;
         const user = await User.findOne({ email: email, role: role });
 
-        if (!user || user.password !== password) {
+       
+        const isMatch = user && await bcrypt.compare(password, user.password);
+        if (!isMatch) {
             return res.status(401).json({ message: "Invalid email, password, or role." });
+        }
+
+        if (!user.isVerified) {
+            return res.status(401).json({ message: "❌ Please verify your email before logging in." });
         }
 
         res.status(200).json({
@@ -98,35 +107,37 @@ router.post('/login', async (req, res) => {
 // ==========================================
 // 3. VERIFY OTP
 // ==========================================
-// ==========================================
-// 3. VERIFY OTP
-// ==========================================
 router.post('/verify-otp', async (req, res) => {
     try {
-        const { email } = req.body; // Try to grab the email from the frontend
+        const { email, otp } = req.body;
 
-        // Look up the user we just registered
         const user = await User.findOne({ email: email });
 
-        if (user) {
-            // If we found them, send back their REAL IDs!
-            res.status(200).json({ 
-                success: true, 
-                message: "✅ Email verified successfully!",
-                id: user._id,
-                patientId: user.patientId,
-                doctorId: user.doctorId
-            });
-        } else {
-            // Fallback just in case the frontend didn't send the email
-            res.status(200).json({ 
-                success: true, 
-                message: "✅ Email verified successfully!",
-                id: "VERIFIED",
-                patientId: "VERIFIED",
-                doctorId: "VERIFIED"
-            });
+        if (!user) {
+            return res.status(400).json({ message: "❌ User not found." });
         }
+
+        if (user.otp !== otp) {
+            return res.status(400).json({ message: "❌ Incorrect OTP. Please try again." });
+        }
+
+        if (user.otpExpires < new Date()) {
+            return res.status(400).json({ message: "❌ OTP has expired. Please register again." });
+        }
+
+        // OTP is correct — mark verified and clear OTP
+        user.isVerified = true;
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        await user.save();
+
+        res.status(200).json({ 
+            success: true, 
+            message: "✅ Email verified successfully!",
+            id: user._id,
+            patientId: user.patientId,
+            doctorId: user.doctorId
+        });
 
     } catch (err) {
         console.error("Verification Crash:", err);

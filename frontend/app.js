@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
 
-                if (response.ok) {
+                if (response.ok && data.isVerified !== false) {
                     // ✅ SUCCESS! 
                     
                     // 3. Save the details to memory
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 } else {
                     // ❌ FAILED 
-                    alert("❌ Login Failed: " + (data.message || "Invalid credentials"));
+                    alert("❌ Login Failed: " + (data.message || "Invalid credentials. If you just registered, please verify your email first."));
                 }
 
             } catch (error) {
@@ -357,28 +357,36 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('aiTyping').style.display = 'block';
 
             try {
-                const response = await fetch('/api/patients/ai-chat', {
+                const response = await fetch(`/api/patients/ai-predictive-triage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: text || "Analyze this medical image.", 
-                        patientDisease: patientData.primaryDisease,
-                        image: currentBase64Image 
-                    })
+                    body: JSON.stringify({ email })
                 });
                 
                 const data = await response.json();
+                document.getElementById('aiTriageText').innerHTML = `<strong>Assessment:</strong> ${data.analysis}`;
                 
-                currentBase64Image = null;
-                document.getElementById('aiImageInput').value = '';
+                // ✨ THE MISSING COLOR LOGIC ✨
+                const triageBox = document.getElementById('aiTriageResult');
+                if (data.riskLevel === 'HIGH') {
+                    triageBox.style.backgroundColor = '#FDE8E8'; 
+                    triageBox.style.border = '2px solid #F98080';
+                    triageBox.style.color = '#9B1C1C';
+                } 
+                else if (data.riskLevel === 'MEDIUM') {
+                    triageBox.style.backgroundColor = '#FEF08A'; 
+                    triageBox.style.border = '2px solid #EAB308';
+                    triageBox.style.color = '#713F12';
+                } 
+                else {
+                    triageBox.style.backgroundColor = '#DEF7EC'; 
+                    triageBox.style.border = '2px solid #31C48D';
+                    triageBox.style.color = '#03543F';
+                }
                 
-                document.getElementById('aiTyping').style.display = 'none';
-                chatBox.innerHTML += `<div class="msg ai"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">AI Assistant</strong>${data.reply}</div>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
-
-            } catch(e) {
-                document.getElementById('aiTyping').style.display = 'none';
-                alert("Error connecting to AI Assistant.");
+            } catch (err) {
+                document.getElementById('aiTriageText').innerText = "Error running AI triage. Please ensure your backend is configured.";
+                console.error(err);
             }
         }
 

@@ -10,7 +10,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 // 1. Fetch ALL Patients
 router.get('/doctor/:doctorId', async (req, res) => {
     try {
-        const patients = await Patient.find({}); 
+        const patients = await Patient.find({ assignedDoctorId: req.params.doctorId });
         res.json(patients);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -164,24 +164,6 @@ router.delete('/remove/:dbId', async (req, res) => {
 // ==========================================
 // 🚀 AI MEDICAL ASSISTANT CHATBOT
 // ==========================================
-router.post('/ai-chat', async (req, res) => {
-    try {
-        const { message, patientDisease } = req.body;
-        
-       // 🚨 NO QUOTES around process.env! 🚨
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-2.5-flash", 
-            systemInstruction: `You are a helpful, empathetic medical AI assistant for the healthcare platform 'NextStep Care'. The patient's primary condition is: ${patientDisease}. Provide safe lifestyle, diet, or general wellness advice based on their condition. Keep your answers short (under 3 sentences). CRITICAL RULE: Always remind the patient to consult their actual doctor for emergencies or changes in medication.`
-        });
-
-        const result = await model.generateContent(message);
-        res.json({ reply: result.response.text() });
-    } catch (err) {
-        console.error("AI CRASH:", err);
-        res.status(500).json({ reply: "🚨 SYSTEM ERROR: " + err.message });
-    }
-});
 
 module.exports = router;
