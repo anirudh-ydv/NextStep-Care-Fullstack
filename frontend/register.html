@@ -3,19 +3,19 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - NextStep Care</title>
-    <link rel="stylesheet" href="stylo.css">
+    <link rel="stylesheet" href="stylo.css?v=2">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="landing-body">
     <div class="login-container">
         <div class="login-box">
             <div class="logo">
-                <img src="logo.png" alt="Company Logo">
+                <img src="logo.png" alt="Company Logo" onerror="this.src='https://via.placeholder.com/40?text=🏥'">
                 <h1>Create Account</h1>
                 <p>Join NextStep-Care today</p>
             </div>
             
-            <form onsubmit="handleRegister(event)">
+            <form id="registerForm" onsubmit="handleRegister(event)">
                 
                 <div class="input-group">
                     <i class="fas fa-user-tag"></i>

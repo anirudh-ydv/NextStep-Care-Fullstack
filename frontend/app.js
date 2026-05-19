@@ -64,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// --- REGISTRATION PAGE UI LOGIC ---
+// --- REGISTRATION PAGE UI & SUBMISSION LOGIC ---
+
 // Logic to hide Specialization if Patient is selected
 function toggleSpecialization() {
     const roleDropdown = document.getElementById('userType');
@@ -75,6 +76,63 @@ function toggleSpecialization() {
         specGroup.style.display = (roleDropdown.value === 'doctor') ? 'block' : 'none';
     }
 }
+
+// Run once when page loads to set initial state
+document.addEventListener('DOMContentLoaded', toggleSpecialization);
+
+// Registration Submission Logic
+window.handleRegister = async function(e) {
+    if (e) e.preventDefault(); // Stop page reload
+
+    // Grab the inputs
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const passInput = document.getElementById('password');
+    const roleInput = document.getElementById('userType');
+    const specInput = document.getElementById('specialization');
+
+    // Create the data object to send to the backend
+    const userData = {
+        name: nameInput.value,
+        email: emailInput.value,
+        role: roleInput.value,
+        password: passInput.value,
+        specialization: specInput ? specInput.value : ""
+    };
+
+    // Change button text so you know it's loading
+    const registerBtn = document.querySelector('button[type="submit"]');
+    const originalText = registerBtn.innerHTML;
+    registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
+    registerBtn.disabled = true;
+
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+        });
+
+        const data = await response.json(); 
+
+        if (response.ok) {
+            // ✅ Success! Save email to memory and go to verify page
+            localStorage.setItem('emailToVerify', userData.email);
+            window.location.href = 'verify.html';
+        } else {
+            // ❌ Backend rejected it (e.g. Email already used)
+            alert("⚠️ Registration Failed: " + (data.message || "Unknown error"));
+        }
+    } catch (err) {
+        // 🚨 Server crash or not running
+        console.error("Registration fetch error:", err);
+        alert("🚨 Server error! Make sure your Node.js backend is running and connected to MongoDB.");
+    } finally {
+        // Reset button
+        registerBtn.innerHTML = originalText;
+        registerBtn.disabled = false;
+    }
+};
 
 // Run once when page loads to set initial state
 document.addEventListener('DOMContentLoaded', toggleSpecialization);
