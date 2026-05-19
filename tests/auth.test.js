@@ -119,10 +119,10 @@ test('normaliseVital — missing value returns 0.5 (neutral)', () => {
 // ════════════════════════════════════════════════════════════════
 test('calculateTrend — rising values return positive slope', () => {
     const vitals = [
-        { systolicBP: 110 }, { systolicBP: 120 },
-        { systolicBP: 130 }, { systolicBP: 140 }, { systolicBP: 155 },
+        { systolic: 110 }, { systolic: 120 },
+        { systolic: 130 }, { systolic: 140 }, { systolic: 155 },
     ];
-    const slope = calculateTrend(vitals, 'systolicBP');
+    const slope = calculateTrend(vitals, 'systolic');
     assert.ok(slope > 0, `Expected positive slope, got ${slope}`);
 });
 
@@ -137,15 +137,15 @@ test('calculateTrend — falling values return negative slope', () => {
 
 test('calculateTrend — flat values return slope near zero', () => {
     const vitals = [
-        { bloodSugar: 100 }, { bloodSugar: 100 },
-        { bloodSugar: 100 }, { bloodSugar: 100 },
+        { sugar: 100 }, { sugar: 100 },
+        { sugar: 100 }, { sugar: 100 },
     ];
-    const slope = calculateTrend(vitals, 'bloodSugar');
+    const slope = calculateTrend(vitals, 'sugar');
     assert.ok(Math.abs(slope) < 0.01, `Expected ~0, got ${slope}`);
 });
 
 test('calculateTrend — single entry returns 0 (no trend possible)', () => {
-    assert.equal(calculateTrend([{ systolicBP: 130 }], 'systolicBP'), 0);
+    assert.equal(calculateTrend([{ systolic: 130 }], 'systolic'), 0);
 });
 
 // ════════════════════════════════════════════════════════════════
@@ -153,7 +153,7 @@ test('calculateTrend — single entry returns 0 (no trend possible)', () => {
 // ════════════════════════════════════════════════════════════════
 test('calculateRiskScore — perfect vitals score LOW risk', () => {
     const vitals = Array.from({ length: 5 }, () => ({
-        systolicBP: 115, heartRate: 75, bloodSugar: 100, hemoglobin: 14,
+        systolic: 115, heartRate: 75, sugar: 100, hemoglobin: 14,
     }));
     const result = calculateRiskScore(vitals[4], vitals);
     assert.equal(result.riskLevel, 'LOW');
@@ -162,7 +162,7 @@ test('calculateRiskScore — perfect vitals score LOW risk', () => {
 
 test('calculateRiskScore — dangerously high BP scores HIGH risk', () => {
     const vitals = Array.from({ length: 5 }, () => ({
-        systolicBP: 195, heartRate: 155, bloodSugar: 290, hemoglobin: 5,
+        systolic: 195, heartRate: 155, sugar: 290, hemoglobin: 5,
     }));
     const result = calculateRiskScore(vitals[4], vitals);
     assert.equal(result.riskLevel, 'HIGH');
@@ -171,7 +171,7 @@ test('calculateRiskScore — dangerously high BP scores HIGH risk', () => {
 
 test('calculateRiskScore — two abnormal vitals scores MEDIUM risk', () => {
     const vitals = Array.from({ length: 5 }, () => ({
-        systolicBP: 165, heartRate: 130, bloodSugar: 220, hemoglobin: 9,
+        systolic: 165, heartRate: 130, sugar: 220, hemoglobin: 9,
     }));
     const result = calculateRiskScore(vitals[4], vitals);
     assert.ok(
@@ -181,8 +181,8 @@ test('calculateRiskScore — two abnormal vitals scores MEDIUM risk', () => {
 });
 
 test('calculateRiskScore — rising BP trend increases score vs flat', () => {
-    const flatVitals   = Array.from({ length: 7 }, () => ({ systolicBP: 125, heartRate: 75, bloodSugar: 100, hemoglobin: 14 }));
-    const risingVitals = [110,115,120,125,130,140,155].map(bp => ({ systolicBP: bp, heartRate: 75, bloodSugar: 100, hemoglobin: 14 }));
+    const flatVitals   = Array.from({ length: 7 }, () => ({ systolic: 125, heartRate: 75, sugar: 100, hemoglobin: 14 }));
+    const risingVitals = [110,115,120,125,130,140,155].map(bp => ({ systolic: bp, heartRate: 75, sugar: 100, hemoglobin: 14 }));
 
     const flatResult   = calculateRiskScore(flatVitals[6],   flatVitals);
     const risingResult = calculateRiskScore(risingVitals[6], risingVitals);
@@ -195,7 +195,7 @@ test('calculateRiskScore — rising BP trend increases score vs flat', () => {
 
 test('calculateRiskScore — breakdown percentages are all 0–100', () => {
     const vitals = Array.from({ length: 3 }, () => ({
-        systolicBP: 120, heartRate: 80, bloodSugar: 110, hemoglobin: 13,
+        systolic: 120, heartRate: 80, sugar: 110, hemoglobin: 13,
     }));
     const { breakdown } = calculateRiskScore(vitals[2], vitals);
     for (const [key, val] of Object.entries(breakdown)) {
@@ -205,7 +205,7 @@ test('calculateRiskScore — breakdown percentages are all 0–100', () => {
 
 test('calculateRiskScore — dataPoints matches vitals array length', () => {
     const vitals = Array.from({ length: 8 }, () => ({
-        systolicBP: 115, heartRate: 72, bloodSugar: 95, hemoglobin: 14,
+        systolic: 115, heartRate: 72, sugar: 95, hemoglobin: 14,
     }));
     const result = calculateRiskScore(vitals[7], vitals);
     assert.equal(result.dataPoints, 8);

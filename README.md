@@ -2,7 +2,7 @@
 ### *Smart Recovery. Stronger Tomorrow.*
 
 <p align="center">
-  <b>An AI-powered post-hospital recovery ecosystem designed to bridge the dangerous gap between hospital discharge and full recovery.</b>
+  <b>An AI-powered post-hospital recovery ecosystem that bridges the dangerous gap between hospital discharge and full recovery — using a custom predictive triage algorithm, multimodal AI, and real-time vitals monitoring.</b>
 </p>
 
 <p align="center">
@@ -13,325 +13,214 @@
 
 ---
 
-# 🚨 The Problem: The Silent Crisis After Hospital Discharge
+## 🚨 The Problem: The Silent Crisis After Discharge
 
-Every year, millions of patients leave hospitals with complex recovery instructions, medication schedules, and follow-up responsibilities — but without continuous monitoring or support.
+Every year, millions of patients leave hospitals with complex recovery instructions — but without continuous monitoring or real support.
 
-This creates a dangerous **"Recovery Gap"** where:
-- ⚠️ Patients ignore early warning signs
-- ⚠️ Medication adherence drops drastically
-- ⚠️ Doctors lose visibility into patient health
-- ⚠️ Preventable complications become emergency readmissions
+This creates a dangerous **"30-Day Recovery Gap"** where:
 
-### 📊 Healthcare Reality
-- Nearly **20% of patients are readmitted within 30 days**
-- Many readmissions are **preventable through continuous follow-up**
-- Rural patients often lack immediate healthcare access
-- Overburdened doctors cannot monitor every discharged patient manually
+- Patients ignore early warning signs of deterioration
+- Medication adherence drops drastically without reminders
+- Doctors lose visibility the moment patients walk out
+- Preventable complications escalate into emergency readmissions
+
+**Nearly 20% of patients are readmitted within 30 days. Most of these readmissions are preventable.**
 
 ---
 
-# 💡 Our Solution: NextStep-Care
+## 💡 The Solution: NextStep-Care
 
-NextStep-Care is a **full-stack AI-powered healthcare ecosystem** that transforms post-hospital recovery from a reactive process into a proactive digital care system.
+NextStep-Care is a **full-stack AI-powered healthcare platform** that transforms post-hospital recovery from a reactive process into a proactive digital care system — extending medical supervision directly into the patient's home.
 
-Instead of ending care at hospital discharge, NextStep-Care extends medical supervision directly into the patient’s home through:
-
-✅ AI-powered health guidance  
-✅ Real-time vitals tracking  
-✅ Doctor-patient digital connectivity  
-✅ Predictive health monitoring  
-✅ Telemedicine integration  
-✅ Multilingual accessibility  
-✅ Rural healthcare support  
+| For Doctors | For Patients |
+|---|---|
+| Monitor all discharged patients in one dashboard | Log vitals daily with a simple interface |
+| AI Predictive Triage with risk scoring | 24/7 AI medical assistant (MediBuddy) |
+| One-click Jitsi telemedicine sessions | Upload symptom images for AI visual analysis |
+| Schedule appointments with auto-notifications | View recovery trends via interactive charts |
+| Detect abnormal vitals trends early | Emergency SOS escalation |
 
 ---
 
-# 🌟 Core Innovation
+## ⚙️ The Algorithm — Predictive Clinical Triage
 
-Unlike traditional telemedicine or appointment systems, **NextStep-Care focuses specifically on continuous post-hospital recovery monitoring** using AI-assisted intelligence and proactive healthcare tracking.
+> **This is the core technical innovation of NextStep-Care.**  
+> Algorithmic excellence — here is exactly how ours works.
 
-### 🚀 What Makes NextStep-Care Different?
-- 🧠 AI-powered recovery intelligence
-- 📷 Multimodal medical image analysis
-- 📊 Predictive vitals-based risk detection
-- 🌍 Rural healthcare accessibility through ASHA-worker support
-- 🗣️ Bilingual English/Hindi support
-- 📹 Instant telemedicine consultations
-- 🚨 Emergency escalation workflows
+**Type:** Weighted Multi-Parameter Risk Scoring with Linear Trend Detection (OLS Regression)  
+**Time Complexity:** O(n) — single pass over vitals history  
+**Space Complexity:** O(1) — no auxiliary data structures allocated
 
 ---
 
-# 🖼️ Platform Highlights
+### Step 1 — Normalise Each Vital · O(1) per vital
 
-## 👨‍⚕️ Physician Command Center
-Doctors can:
-- Monitor multiple discharged patients simultaneously
-- Track vitals in real-time
-- Detect abnormal recovery trends
-- Generate prescriptions digitally
-- Launch instant telemedicine sessions
+Each raw reading is mapped to a **danger score between 0.0 and 1.0** using piecewise linear scaling against clinical reference ranges:
 
----
+```
+0.0  ──  Safe zone     (within normal clinical bounds)
+0.5  ──  Warning zone  (approaching dangerous boundary)
+1.0  ──  Critical zone (outside safe limits entirely)
+```
 
-## 📱 Patient Recovery Hub
-Patients can:
-- Log vitals easily
-- Track medication adherence
-- View recovery analytics
-- Receive AI-generated guidance
-- Trigger emergency SOS alerts
+| Vital | critLow | safeLow | safeHigh | critHigh | Unit |
+|---|---|---|---|---|---|
+| Systolic BP | 70 | 90 | 130 | 180 | mmHg |
+| Heart Rate | 40 | 60 | 100 | 150 | bpm |
+| Blood Sugar | 50 | 70 | 140 | 300 | mg/dL |
+| Hemoglobin | 6 | 11 | 17 | 20 | g/dL |
 
 ---
 
-## 🤖 AI Medical Assistant — *MediBuddy*
-Powered by **Google Gemini AI**, MediBuddy acts as a 24/7 intelligent recovery companion.
+### Step 2 — Detect Deterioration Trend · O(n)
 
-### ✨ AI Capabilities
-- Personalized recovery guidance
-- Disease-specific wellness recommendations
-- Symptom analysis
-- Medical image interpretation
-- Prescription understanding
-- Red-flag danger detection
-- Multilingual assistance
+**Ordinary Least Squares (OLS) linear regression** runs over the patient's full vitals history to compute the slope of BP, Heart Rate, and Blood Sugar over time.
 
-### 🧠 Multimodal Intelligence
-Patients can upload:
-- Symptom images
-- Skin conditions
-- Medical reports
-- Prescription labels
+```
+slope = (n·ΣXY − ΣX·ΣY) / (n·ΣX² − (ΣX)²)
+```
 
-The AI analyzes them contextually and provides actionable healthcare guidance.
+Only **upward slopes** (worsening trends) contribute to the final risk score — a rising BP is dangerous, a falling one is recovery. The slope is clamped to [-1, +1] for consistency.
+
+This means a patient with *borderline* current readings but a *consistently worsening trajectory* still gets flagged — catching deterioration before it becomes a crisis.
 
 ---
 
-# 📊 Real-Time Health Analytics
+### Step 3 — Weighted Composite Score
 
-Using dynamic visualization systems powered by **Chart.js**, NextStep-Care converts raw medical data into understandable recovery insights.
-
-### 📈 Monitored Health Metrics
-- Blood Pressure
-- Heart Rate
-- Blood Sugar
-- Hemoglobin
-- Medication Compliance Trends
-
-### 🚨 Smart Risk Detection
-The platform automatically identifies:
-- abnormal vitals,
-- recovery deterioration,
-- and high-risk patient patterns.
+| Parameter | Weight | Clinical Rationale |
+|---|---|---|
+| Systolic BP | **30%** | #1 predictor of cardiac events post-discharge |
+| Heart Rate | **25%** | Reflects acute distress and arrhythmia risk |
+| Blood Sugar | **20%** | Critical for diabetic and post-surgical patients |
+| Hemoglobin | **15%** | Flags anaemia, internal bleeding, malnutrition |
+| Trend Penalty | **10%** | Worsening trajectory increases risk even on borderline readings |
 
 ---
 
-# 🌍 Accessibility & Social Impact
+### Step 4 — Risk Classification
 
-## 🏡 Rural Healthcare Integration
-Many rural patients lack:
-- smartphones,
-- internet literacy,
-- or hospital accessibility.
+```
+score ≥ 0.65  →  🔴 HIGH    — Immediate physician review required
+score ≥ 0.35  →  🟡 MEDIUM  — Monitor closely, schedule follow-up
+score  < 0.35  →  🟢 LOW     — Stable, continue routine monitoring
+```
 
-NextStep-Care solves this through:
-### 👩‍⚕️ ASHA Worker Assisted Monitoring
-ASHA workers act as the bridge between:
-- patients,
-- doctors,
-- and the digital platform.
-
-This makes healthcare monitoring possible even in underserved communities.
+Once the algorithm produces a score, **Google Gemini 2.5 Flash** narrates the result in plain clinical English for the attending doctor — but the risk decision is always owned by the algorithm, not the AI.
 
 ---
 
-# 🌐 Multilingual Healthcare
-The platform supports:
-- 🇬🇧 English
-- 🇮🇳 Hindi
+## 🧪 Test Suite
 
-This improves accessibility for diverse patient demographics.
+Fully tested with **zero extra dependencies** using Node 18+'s built-in test runner.
 
----
+```bash
+npm test
+```
 
-# 📹 One-Click Telemedicine
-Integrated secure video consultations using **Jitsi Meet** enable immediate doctor-patient interaction without requiring additional software downloads.
+**Covers 20 test cases across 3 modules:**
 
----
-
-# 🏗️ Technical Architecture
-
-### ⚙️ Full-Stack Monorepo Architecture
-         
-### 🖥️ Frontend
-- HTML5
-- CSS3
-- JavaScript
-- Glassmorphism UI
-- Fully Responsive Design
-  ```mermaid
-                      graph TD
-    Client[Frontend: JS + Glassmorphism UI] <-->|REST API / JSON| Server[Backend: Node.js & Express]
-    Server <-->|Read/Write Patient Vitals| DB[(MongoDB Atlas Cloud)]
-    Server <-->|Multimodal Prompts| AI[Google Gemini 1.5 Flash API]
-    Server -->|Email OTP Auth| Email[Nodemailer Integration]
-    Server -->|Hosting| Deploy[Render CI/CD]
-
-### 🧠 AI Layer
-- Google Gemini 1.5 Flash API
-- NLP + Multimodal Vision Processing
-- Context-Aware Medical Guidance
-
-### 🔧 Backend
-- Node.js
-- Express.js
-- REST API Architecture
-- JWT Authentication
-- OTP Verification System
-
-### 🗄️ Database
-- MongoDB Atlas
-- Cloud-Native NoSQL Storage
-
-### 🚀 Deployment
-- Render Cloud Deployment
-- Git Version Control
-   
----
-
-# 🔐 Security Features
-- Role-Based Access Control (RBAC)
-- Secure Authentication System
-- Email OTP Verification
-- Protected Patient Data Flows
-- Secure API Handling
+| Module | Tests |
+|---|---|
+| OTP Generation | 6-digit format, randomness guarantee |
+| bcrypt Auth | Hash differs from plaintext, correct/wrong password verification |
+| JWT | Patient token, doctor role, tampered token rejection |
+| `normaliseVital()` | Safe zone, critHigh, critLow, warning zone, null/NaN/undefined |
+| `calculateTrend()` | Rising slope, falling slope, flat (near-zero), single entry edge case |
+| `calculateRiskScore()` | LOW/MEDIUM/HIGH classification, trend penalty effect, breakdown range, dataPoints count |
 
 ---
 
-# 📈 Real-World Impact
+## 🏗️ Technical Architecture
 
-## 🎯 Potential Outcomes
-- Reduce preventable readmissions
-- Improve medication adherence
-- Enable continuous recovery monitoring
-- Increase doctor efficiency
-- Improve healthcare accessibility
-- Reduce patient anxiety after discharge
+```mermaid
+graph TD
+    A[Frontend<br/>HTML5 · CSS3 · JS · Glassmorphism UI] <-->|REST API · JSON| B[Backend<br/>Node.js · Express.js]
+    B <-->|Read/Write Patient Vitals| C[(MongoDB Atlas<br/>Cloud NoSQL)]
+    B <-->|Multimodal Prompts<br/>Text + Image| D[Google Gemini 2.5 Flash API]
+    B -->|OTP Email Verification| E[Nodemailer · Gmail]
+    B -->|CI/CD Pipeline| F[Render Cloud Hosting]
+    B -->|Video Consultations| G[Jitsi Meet]
+```
 
----
-# 🌍 Global Impact (SDG Alignment)
+### Stack at a Glance
 
-NextStep-Care is designed not only as a healthcare platform, but as a scalable digital recovery infrastructure addressing some of India’s most critical healthcare challenges.
-
----
-
-## ✅ SDG 3 — Good Health & Well-being
-
-### 📉 Reducing Preventable Readmissions
-India records **40+ million hospital discharges annually**, yet many patients receive little or no structured follow-up care after leaving the hospital.
-
-Research and healthcare reports indicate:
-- nearly **1 in 4 patients are readmitted within 30 days**
-- many cases are preventable through continuous monitoring and timely intervention.
-
-### 🧠 How NextStep-Care Helps
-NextStep-Care improves recovery outcomes through:
-- AI-powered recovery guidance
-- real-time vitals monitoring
-- medication adherence tracking
-- automated red-flag detection
-- and rapid telemedicine escalation.
-
-### 🚨 Proactive Care Instead of Reactive Emergencies
-The platform transforms post-discharge care from:
-> “wait until complications occur”
-
-to:
-> “detect deterioration early and intervene immediately.”
-
-This directly contributes to:
-- reduced emergency readmissions,
-- improved patient recovery,
-- and lower preventable mortality rates.
+| Layer | Technology |
+|---|---|
+| Frontend | HTML5, CSS3, JavaScript, Glassmorphism UI, Chart.js |
+| Backend | Node.js, Express.js, REST API |
+| Database | MongoDB Atlas (Cloud NoSQL) |
+| AI | Google Gemini 2.5 Flash (Text + Vision) |
+| Auth | JWT + bcrypt + Email OTP (Nodemailer) |
+| Video | Jitsi Meet (no download required) |
+| Testing | Node.js built-in test runner |
+| Deployment | Render (CI/CD via GitHub) |
 
 ---
 
-## ✅ SDG 9 — Industry, Innovation and Infrastructure
+## 🔐 Security Architecture
 
-### 🚀 Building Resilient Digital Health Infrastructure
-Traditional healthcare infrastructure is heavily centralized in urban hospitals, leading to overcrowding and inefficiencies. 
-
-NextStep-Care introduces a **decentralized digital infrastructure** by leveraging cutting-edge web technologies and Artificial Intelligence. 
-
-### 🧠 Driving Innovation with AI
-By integrating **Google Gemini 1.5 Flash**, the platform brings enterprise-level multimodal AI capabilities directly to the patient's home. 
-- **Innovative Diagnostics:** Allowing patients to upload images for AI triage pushes the boundary of how post-op care is managed.
-- **System Resilience:** By monitoring vitals remotely, the platform reduces the physical strain on hospital infrastructure, freeing up beds for critical emergency patients while keeping recovering patients safe at home.
+- **Role-Based Access Control (RBAC)** — patients and doctors see completely separate interfaces; cross-access is blocked at both frontend and API level
+- **Email OTP Verification** — no account is active until the 6-digit OTP is confirmed (10-minute expiry)
+- **bcrypt Password Hashing** — salted at cost factor 10; plaintext passwords never stored
+- **JWT Session Management** — stateless auth tokens; tampered tokens are cryptographically rejected
+- **API Route Guards** — all patient data endpoints are protected; unauthenticated requests are blocked
 
 ---
 
-## ✅ SDG 10 — Reduced Inequalities
+## 🚀 Local Setup
 
-### 🏡 Bridging Rural Healthcare Gaps
-Nearly **67% of India’s population lives in rural areas**, where access to continuous medical follow-up remains limited.
+```bash
+# 1. Clone and install
+git clone https://github.com/anirudh-ydv/NextStep-Care-Fullstack.git
+cd NextStep-Care-Fullstack
+npm install
 
-Additionally:
-- India faces a severe doctor shortage with a **doctor-to-patient ratio of approximately 1:1,456**. 
+# 2. Create a .env file in the root with:
+MONGO_URI=your_mongodb_atlas_connection_string
+GEMINI_API_KEY=your_google_gemini_api_key
+JWT_SECRET=your_jwt_secret_key
+EMAIL_USER=your_gmail_address
+EMAIL_PASS=your_gmail_app_password
 
-This makes continuous post-hospital monitoring extremely difficult.
+# 3. Start the server
+node server.js
+# Server runs on http://localhost:5000
 
----
-
-## 👩‍⚕️ ASHA Worker Assisted Monitoring
-
-NextStep-Care introduces a localized healthcare delivery workflow where:
-- ASHA workers visit patient homes,
-- record vitals,
-- assist patients lacking digital literacy,
-- and connect rural patients to doctors through telemedicine.
-
-This creates:
-- affordable follow-up care,
-- last-mile healthcare accessibility,
-- and digital healthcare inclusion.
+# 4. Run the full test suite
+npm test
+```
 
 ---
 
-## 🌐 Inclusive Digital Healthcare
+## 🌍 Social Impact & SDG Alignment
 
-To improve accessibility for diverse populations, NextStep-Care includes:
-- 🇬🇧 English support
-- 🇮🇳 Hindi language support
-- 📶 Low-bandwidth optimization for unstable 3G/4G rural networks.
+### ✅ SDG 3 — Good Health & Well-being
+India records 40+ million hospital discharges annually. Nearly 1 in 4 patients are readmitted within 30 days — most preventably. NextStep-Care transforms post-discharge care from *"wait until complications occur"* to *"detect deterioration early and intervene immediately."*
 
----
+### ✅ SDG 10 — Reduced Inequalities
+Nearly **67% of India's population lives in rural areas** where continuous medical follow-up is nearly impossible. NextStep-Care addresses this through:
+- **ASHA Worker Integration** — community health workers log vitals on behalf of patients without smartphones
+- **Bilingual Support** — full English and Hindi interface
+- **Low-bandwidth optimisation** — functional on 3G networks
 
-## ✅ SDG 17 — Partnerships for the Goals
-
-### 🤝 Multi-Stakeholder Collaboration
-Technology alone cannot solve grassroots healthcare challenges without human connection. NextStep-Care is built on the philosophy of collaborative healthcare delivery.
-
-### 👩‍⚕️ Empowering Community Health Workers
-The platform's design explicitly incorporates **ASHA (Accredited Social Health Activist) workers**. By providing them with digital tools to monitor patients, NextStep-Care creates a powerful partnership between:
-1. **Modern Technology** (AI, Cloud Data, Telemedicine)
-2. **Medical Professionals** (Doctors and Specialists)
-3. **Community Healthcare Workers** (Grassroots support)
-
-This synergistic partnership ensures that technological advancements actually reach the underserved populations, proving that sustainable development requires collaborative effort.
+### ✅ SDG 9 — Industry, Innovation & Infrastructure
+By decentralising hospital-quality monitoring into a cloud-native platform, NextStep-Care reduces physical strain on hospital infrastructure — freeing beds for critical patients while keeping recovering patients safely monitored at home.
 
 ---
 
-## 🚀 Long-Term Vision
+## 🔭 Future Roadmap
 
-NextStep-Care aims to become:
-> a scalable digital recovery ecosystem capable of extending hospital-quality follow-up care into every patient’s home — regardless of geography or economic status.
-
-Future scalability includes:
-- ABHA integration
-- offline-first PWA support
-- WhatsApp emergency alerts
-- wearable device integration
-- and AI-driven predictive healthcare analytics.
+- **IoT & Wearable Integration** — auto-sync heart rate and SpO2 from smartwatches
+- **Multilingual Voice AI** — Speech-to-Text in regional Indian dialects
+- **ABHA Integration** — connect with India's Ayushman Bharat Health Account system
+- **Offline-First PWA** — full functionality in zero-connectivity zones
+- **WhatsApp Emergency Alerts** — real-time escalation via WhatsApp Business API
 
 
 ---
+
+<p align="center">
+  <i>NextStep-Care — Democratising quality post-discharge care for every patient, everywhere.</i><br>
+  <i>Aligned with SDG 3 · SDG 9 · SDG 10</i>
+</p>
