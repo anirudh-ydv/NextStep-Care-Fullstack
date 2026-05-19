@@ -554,12 +554,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             filteredPatients.forEach(patient => {
+                // 1. Dynamic Status Colors
                 let statusRaw = (patient.healthStatus || 'stable').toLowerCase();
-                let badgeClass = 'status-stable';
-                if (statusRaw === 'critical') badgeClass = 'status-critical';
-                if (statusRaw === 'moderate') badgeClass = 'status-moderate';
+                let statusBgColor = '#DEF7EC'; // Green
+                let statusTextColor = '#03543F';
 
-                let niceDate = "N/A";
+                if (statusRaw === 'critical') {
+                    statusBgColor = '#FDE8E8'; // Red
+                    statusTextColor = '#9B1C1C';
+                } else if (statusRaw === 'moderate') {
+                    statusBgColor = '#FEF08A'; // Yellow
+                    statusTextColor = '#713F12';
+                }
+
+                // 2. Date Fallback Logic
+                let niceDate = "Not Scheduled";
                 if (patient.nextAppointment) {
                     const apptDate = new Date(patient.nextAppointment);
                     const now = new Date();
@@ -578,8 +587,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td style="font-weight: bold; color: #1e3c72;">${patient.patientId || 'N/A'}</td>
                         <td style="font-weight: bold; color: #1e293b;">${patient.name || 'Unknown'}</td>
                         <td>${patient.primaryDisease || 'N/A'}</td>
-                        <td>${niceDate.includes('Passed') ? niceDate : `<i class="far fa-calendar-alt" style="color:#64748b; margin-right:5px;"></i> ${niceDate}`}</td>
-                        <td><span class="status-badge ${badgeClass}">${statusRaw.toUpperCase()}</span></td>
+                        <td>${niceDate.includes('Passed') || niceDate === 'Not Scheduled' ? niceDate : `<i class="far fa-calendar-alt" style="color:#64748b; margin-right:5px;"></i> ${niceDate}`}</td>
+                        <td>
+                            <span style="background-color: ${statusBgColor}; color: ${statusTextColor}; padding: 4px 8px; border-radius: 4px; font-weight: bold; display: inline-block;">
+                                ${statusRaw.toUpperCase()}
+                            </span>
+                        </td>
                         <td>${viewBtn} ${dischargeBtn}</td>
                     </tr>`;
             });
