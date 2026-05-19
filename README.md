@@ -256,6 +256,20 @@ This directly contributes to:
 
 ---
 
+## ✅ SDG 9 — Industry, Innovation and Infrastructure
+
+### 🚀 Building Resilient Digital Health Infrastructure
+Traditional healthcare infrastructure is heavily centralized in urban hospitals, leading to overcrowding and inefficiencies. 
+
+NextStep-Care introduces a **decentralized digital infrastructure** by leveraging cutting-edge web technologies and Artificial Intelligence. 
+
+### 🧠 Driving Innovation with AI
+By integrating **Google Gemini 1.5 Flash**, the platform brings enterprise-level multimodal AI capabilities directly to the patient's home. 
+- **Innovative Diagnostics:** Allowing patients to upload images for AI triage pushes the boundary of how post-op care is managed.
+- **System Resilience:** By monitoring vitals remotely, the platform reduces the physical strain on hospital infrastructure, freeing up beds for critical emergency patients while keeping recovering patients safe at home.
+
+---
+
 ## ✅ SDG 10 — Reduced Inequalities
 
 ### 🏡 Bridging Rural Healthcare Gaps
@@ -289,6 +303,21 @@ To improve accessibility for diverse populations, NextStep-Care includes:
 - 🇬🇧 English support
 - 🇮🇳 Hindi language support
 - 📶 Low-bandwidth optimization for unstable 3G/4G rural networks.
+
+---
+
+## ✅ SDG 17 — Partnerships for the Goals
+
+### 🤝 Multi-Stakeholder Collaboration
+Technology alone cannot solve grassroots healthcare challenges without human connection. NextStep-Care is built on the philosophy of collaborative healthcare delivery.
+
+### 👩‍⚕️ Empowering Community Health Workers
+The platform's design explicitly incorporates **ASHA (Accredited Social Health Activist) workers**. By providing them with digital tools to monitor patients, NextStep-Care creates a powerful partnership between:
+1. **Modern Technology** (AI, Cloud Data, Telemedicine)
+2. **Medical Professionals** (Doctors and Specialists)
+3. **Community Healthcare Workers** (Grassroots support)
+
+This synergistic partnership ensures that technological advancements actually reach the underserved populations, proving that sustainable development requires collaborative effort.
 
 ---
 
