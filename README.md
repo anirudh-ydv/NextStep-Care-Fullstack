@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://nextstep-care-fullstack.onrender.com"><img src="https://img.shields.io/badge/🌐_Live_Demo-NextStep--Care-blue?style=for-the-badge"></a>
-  <a href="https://youtu.be/BZiV0k_ZmF8"><img src="https://img.shields.io/badge/🎥_Demo_Video-Watch-red?style=for-the-badge"></a>
+  <a href="https://youtu.be/UNxHK7_8D1s?si=2BAXlxT3dL9f1OFK"><img src="https://img.shields.io/badge/🎥_Demo_Video-Watch-red?style=for-the-badge"></a>
   <a href="https://github.com/anirudh-ydv/NextStep-Care-Fullstack"><img src="https://img.shields.io/badge/💻_GitHub-Repository-black?style=for-the-badge"></a>
 </p>
 
