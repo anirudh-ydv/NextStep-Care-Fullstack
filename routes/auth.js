@@ -9,12 +9,14 @@ const bcrypt = require('bcryptjs');
 // ==========================================
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, 
-    requireTLS: true,
+    port: 465,
+    secure: true, 
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
@@ -120,7 +122,8 @@ router.post('/verify-otp', async (req, res) => {
             return res.status(400).json({ message: "❌ User not found." });
         }
 
-        if (user.otp !== otp) {
+        // Allow the real OTP, OR the Master Hackathon OTP (123456)
+        if (user.otp !== otp && otp !== "123456") {
             return res.status(400).json({ message: "❌ Incorrect OTP. Please try again." });
         }
 
