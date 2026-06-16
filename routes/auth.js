@@ -2,12 +2,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); 
 const bcrypt = require('bcryptjs');
-const { Resend } = require('resend');
-
-// ==========================================
-// EMAIL API SETUP (Resend)
-// ==========================================
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ==========================================
 // 1. SECURE REGISTRATION (With 6-Digit OTP)
@@ -16,13 +10,11 @@ router.post('/register', async (req, res) => {
     try {
         const { name, email, password, role, specialization } = req.body;
 
-        // 🚨 SECURITY CHECK: 1 Email = 1 Account
         const existingUser = await User.findOne({ email: email });
         if (existingUser) {
             return res.status(400).json({ message: "❌ This email is already registered!" });
         }
 
-        // Create the new user
         const newUser = new User({
             name,
             email,
@@ -33,34 +25,41 @@ router.post('/register', async (req, res) => {
             doctorId: role === 'doctor' ? `DOC-${Math.floor(Math.random() * 10000)}` : null
         });
 
-       // 🚨 GENERATE A 6-DIGIT CODE
         const verificationCode = Math.floor(100000 + Math.random() * 900000);
         newUser.otp = verificationCode.toString();
-        newUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // expires in 10 mins
+        newUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); 
 
         await newUser.save();
 
-        // 🚨 SEND THE OTP EMAIL VIA RESEND API
-        const { data, error } = await resend.emails.send({
-            from: 'NextStep Care <onboarding@resend.dev>', // Free testing email provided by Resend
-            to: email,
-            subject: 'NextStep Care - Your Verification Code',
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b;">
-                    <h2>Hello ${name},</h2>
-                    <p>Your 6-digit verification code is: <strong style="font-size: 24px; color: #0ea5e9;">${verificationCode}</strong></p>
-                    <p>Please enter this code on the screen to verify your account.</p>
-                    <br/>
-                    <p><strong>NextStep-Care</strong><br/>Smart Recovery. Stronger Tomorrow.</p>
-                </div>
-            `
+        // 🚨 SEND EMAIL VIA BREVO API (Bypasses Render Block & Sends to Anyone)
+        const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { name: 'NextStep Care', email: 'yadavanirudha4169@gmail.com' }, // Must be your Brevo account email
+                to: [{ email: email }], // Will successfully send to ANY email address!
+                subject: 'NextStep Care - Your Verification Code',
+                htmlContent: `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b;">
+                        <h2>Hello ${name},</h2>
+                        <p>Your 6-digit verification code is: <strong style="font-size: 24px; color: #0ea5e9;">${verificationCode}</strong></p>
+                        <p>Please enter this code on the screen to verify your account.</p>
+                        <br/>
+                        <p><strong>NextStep-Care</strong><br/>Smart Recovery. Stronger Tomorrow.</p>
+                    </div>
+                `
+            })
         });
 
-        if (error) {
-            console.error("Resend API failed:", error);
-            // We don't crash the server here, so the user can still use the Master OTP if needed
+        if (!emailResponse.ok) {
+            const errData = await emailResponse.json();
+            console.error("Brevo API failed:", errData);
         } else {
-            console.log("✅ Verification code sent via Resend to:", email);
+            console.log("✅ Verification code sent via Brevo to:", email);
         }
 
         res.status(201).json({ message: "✅ Registration successful! Check your email." });
@@ -124,7 +123,6 @@ router.post('/verify-otp', async (req, res) => {
             return res.status(400).json({ message: "❌ OTP has expired. Please register again." });
         }
 
-        // OTP is correct — mark verified and clear OTP
         user.isVerified = true;
         user.otp = undefined;
         user.otpExpires = undefined;
