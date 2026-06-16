@@ -1,25 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); 
-const nodemailer = require('nodemailer'); 
 const bcrypt = require('bcryptjs');
+const { Resend } = require('resend');
 
 // ==========================================
-// EMAIL ENGINE SETUP (The Postman)
+// EMAIL API SETUP (Resend)
 // ==========================================
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, 
-    family: 4, // 🚨 THE MAGIC FIX: Forces IPv4 and completely bypasses the broken Render network
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ==========================================
 // 1. SECURE REGISTRATION (With 6-Digit OTP)
@@ -52,22 +40,28 @@ router.post('/register', async (req, res) => {
 
         await newUser.save();
 
-        // 🚨 SEND THE OTP EMAIL
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
+        // 🚨 SEND THE OTP EMAIL VIA RESEND API
+        const { data, error } = await resend.emails.send({
+            from: 'NextStep Care <onboarding@resend.dev>', // Free testing email provided by Resend
             to: email,
             subject: 'NextStep Care - Your Verification Code',
-            text: `Hello ${name},\n\nYour 6-digit verification code is: ${verificationCode}\n\nPlease enter this code on the screen to verify your account.\n\nNextStep-Care\nSmart Recovery. Stronger Tomorrow.`
-        };
-
-        // Tell the postman to deliver it
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error("Email failed to send:", error);
-            } else {
-                console.log("✅ Verification code sent to:", email);
-            }
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b;">
+                    <h2>Hello ${name},</h2>
+                    <p>Your 6-digit verification code is: <strong style="font-size: 24px; color: #0ea5e9;">${verificationCode}</strong></p>
+                    <p>Please enter this code on the screen to verify your account.</p>
+                    <br/>
+                    <p><strong>NextStep-Care</strong><br/>Smart Recovery. Stronger Tomorrow.</p>
+                </div>
+            `
         });
+
+        if (error) {
+            console.error("Resend API failed:", error);
+            // We don't crash the server here, so the user can still use the Master OTP if needed
+        } else {
+            console.log("✅ Verification code sent via Resend to:", email);
+        }
 
         res.status(201).json({ message: "✅ Registration successful! Check your email." });
 
@@ -84,7 +78,6 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password, role } = req.body;
         const user = await User.findOne({ email: email, role: role });
-
        
         const isMatch = user && await bcrypt.compare(password, user.password);
         if (!isMatch) {
@@ -116,7 +109,6 @@ router.post('/login', async (req, res) => {
 router.post('/verify-otp', async (req, res) => {
     try {
         const { email, otp } = req.body;
-
         const user = await User.findOne({ email: email });
 
         if (!user) {
