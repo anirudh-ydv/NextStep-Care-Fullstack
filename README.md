@@ -109,25 +109,13 @@ score  < 0.35  →  🟢 LOW     — Stable, continue routine monitoring
 Once the algorithm produces a score, **Google Gemini 2.5 Flash** narrates the result in plain clinical English for the attending doctor — but the risk decision is always owned by the algorithm, not the AI.
 
 ---
+ ## 🎨 UI/UX Philosophy
+The application was designed with **Glassmorphism** and a calming blue color palette to reduce patient anxiety. The interface is highly responsive, ensuring a seamless experience whether the user is on a desktop at a clinic or a low-cost mobile device in a remote area.
 
-## 🧪 Test Suite
+## 📸 Screenshots
 
-Fully tested with **zero extra dependencies** using Node 18+'s built-in test runner.
-
-```bash
-npm test
-```
-
-**Covers 20 test cases across 3 modules:**
-
-| Module | Tests |
-|---|---|
-| OTP Generation | 6-digit format, randomness guarantee |
-| bcrypt Auth | Hash differs from plaintext, correct/wrong password verification |
-| JWT | Patient token, doctor role, tampered token rejection |
-| `normaliseVital()` | Safe zone, critHigh, critLow, warning zone, null/NaN/undefined |
-| `calculateTrend()` | Rising slope, falling slope, flat (near-zero), single entry edge case |
-| `calculateRiskScore()` | LOW/MEDIUM/HIGH classification, trend penalty effect, breakdown range, dataPoints count |
+* **Doctor Dashboard:** <img width="1864" height="898" alt="1st zdoc" src="https://github.com/user-attachments/assets/124b2f4d-a2ae-4a8b-b564-6b4cddd02360" />
+* **Real-time Patient Vitals (Chart.js):**<img width="1893" height="904" alt="image" src="https://github.com/user-attachments/assets/ff382d16-011b-4944-8ccd-17c2748ee128" />
 
 ---
 
@@ -142,19 +130,6 @@ graph TD
     B -->|CI/CD Pipeline| F[Render Cloud Hosting]
     B -->|Video Consultations| G[Jitsi Meet]
 ```
-
-### Stack at a Glance
-
-| Layer | Technology |
-|---|---|
-| Frontend | HTML5, CSS3, JavaScript, Glassmorphism UI, Chart.js |
-| Backend | Node.js, Express.js, REST API |
-| Database | MongoDB Atlas (Cloud NoSQL) |
-| AI | Google Gemini 2.5 Flash (Text + Vision) |
-| Auth | JWT + bcrypt + Email OTP (Nodemailer) |
-| Video | Jitsi Meet (no download required) |
-| Testing | Node.js built-in test runner |
-| Deployment | Render (CI/CD via GitHub) |
 
 ---
 
