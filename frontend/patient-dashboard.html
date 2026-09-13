@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal - NextStep Care</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="stylo.css">
+</head>
+<body class="dashboard-body">
+
+    <div class="sidebar">
+        <div style="padding: 15px; font-weight: 700; color: #1e3c72; font-size: 1.2rem;display: flex; align-items: center;"> <img src="logo.png" alt="Company Logo" style="max-width:32%; height:32%; margin-right: 10px;">NextStep-Care </div>
+        <a onclick="switchTab('overview')" id="tab-overview" class="sidebar-item active"><i class="fas fa-home"></i> <span class="lang-text" data-en="Health Overview" data-hi="स्वास्थ्य अवलोकन">Health Overview</span></a>
+        <a onclick="switchTab('history')" id="tab-history" class="sidebar-item"><i class="fas fa-chart-line"></i> <span class="lang-text" data-en="Recovery History" data-hi="रिकवरी इतिहास">Recovery History</span></a>
+        <a onclick="switchTab('meds')" id="tab-meds" class="sidebar-item"><i class="fas fa-pills"></i> <span class="lang-text" data-en="My Prescriptions" data-hi="मेरी दवाइयां">My Prescriptions</span></a>
+        <a onclick="switchTab('diet')" id="tab-diet" class="sidebar-item"><i class="fas fa-apple-alt"></i> <span class="lang-text" data-en="Diet Plan" data-hi="आहार योजना">Diet Plan</span></a>
+        <a onclick="switchTab('exercise')" id="tab-exercise" class="sidebar-item"><i class="fas fa-running"></i> <span class="lang-text" data-en="Physical Activity" data-hi="शारीरिक गतिविधि">Physical Activity</span></a>
+        <a onclick="switchTab('profile')" id="tab-profile" class="sidebar-item"><i class="fas fa-user"></i> <span class="lang-text" data-en="My Profile" data-hi="मेरी प्रोफाइल">My Profile</span></a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h3 style="margin:0; color: #1e3c72;">
+                <span class="lang-text" data-en="Welcome," data-hi="स्वागत है,">Welcome,</span> <span id="welcomeName">Loading...</span>
+            </h3>
+            <div class="header-actions">
+                <button class="icon-btn lang-btn" onclick="toggleLanguage()">
+                    <i class="fas fa-language"></i> <span id="langIndicator">हिंदी</span>
+                </button>
+                <button class="icon-btn" onclick="openChatModal()" title="Chat with Doctor">
+                    <i class="fas fa-user-md"></i>
+                </button>
+                <button class="icon-btn" onclick="openModal('notifModal')">
+                    <i class="fas fa-bell"></i><span class="badge" id="notifBadge">0</span>
+                </button>
+                <button class="btn-logout" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <div id="view-overview" class="section-view active">
+                
+                <div class="dashboard-top-area">
+                    <div id="missedMedBanner" class="persistent-alert alert-red">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 1.8rem;"></i>
+                            <div>
+                                <h4 style="margin: 0 0 5px 0;" class="lang-text" data-en="Missed Medications" data-hi="छूटी हुई दवाइयां">Missed Medications</h4>
+                                <p id="missedMedBannerText" style="margin: 0; font-size: 0.95rem; font-weight: bold;"></p>
+                            </div>
+                        </div>
+                        <button class="btn-update" style="background: #991b1b; padding: 8px 15px; font-size: 0.9rem;" onclick="openChatModal()">
+                            <i class="fas fa-comments"></i> <span class="lang-text" data-en="Contact Doctor" data-hi="डॉक्टर से बात करें">Contact Doctor</span>
+                        </button>
+                    </div>
+                    
+                    <div id="upcomingMedBanner" class="persistent-alert alert-warning">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <i class="fas fa-clock" style="font-size: 1.8rem;"></i>
+                            <div>
+                                <h4 style="margin: 0 0 5px 0;" class="lang-text" data-en="Medicine Due Now!" data-hi="दवा का समय हो गया!">Medicine Due Now!</h4>
+                                <p id="upcomingMedBannerText" style="margin: 0; font-size: 0.95rem; font-weight: bold;"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vital-grid">
+                    <div class="vital-box"><h4 class="lang-text" data-en="Heart Rate" data-hi="हृदय गति">Heart Rate</h4><h2 id="vHR">--</h2></div>
+                    <div class="vital-box"><h4 class="lang-text" data-en="Blood Pressure" data-hi="रक्तचाप (BP)">Blood Pressure</h4><h2 id="vBP">--</h2></div>
+                    <div class="vital-box"><h4 class="lang-text" data-en="Blood Sugar" data-hi="ब्लड शुगर">Blood Sugar</h4><h2 id="vSugar">--</h2></div>
+                    <div class="vital-box"><h4 class="lang-text" data-en="Hemoglobin" data-hi="हीमोग्लोबिन">Hemoglobin</h4><h2 id="vHemo">--</h2></div>
+                </div>
+
+                <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin-top:0; color:#1e3c72;"><i class="fas fa-calendar-check"></i> <span class="lang-text" data-en="Next Appointment" data-hi="अगली नियुक्ति">Next Appointment</span></h3>
+                        <p id="vAppt" style="margin:0; font-size: 1.2rem; font-weight: bold; color: #0ea5e9;">--</p>
+                    </div>
+                    <div>
+                        <button class="btn-update" id="mainUpdateHealthBtn" onclick="checkUpdateVitals()">
+                            <i class="fas fa-notes-medical"></i> <span class="lang-text" data-en="Update Health" data-hi="स्वास्थ्य अपडेट">Update Health</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-history" class="section-view">
+                <div class="glass-card">
+                    <h3 class="lang-text" data-en="Your Recovery Progress" data-hi="आपकी रिकवरी प्रगति">Your Recovery Progress</h3>
+                    <div class="charts-grid">
+                        <div class="chart-wrapper"><p style="font-weight:bold; color:#475569; margin-top:0;" class="lang-text" data-en="Heart Rate" data-hi="हृदय गति">Heart Rate</p><canvas id="pChartHR"></canvas></div>
+                        <div class="chart-wrapper"><p style="font-weight:bold; color:#475569; margin-top:0;" class="lang-text" data-en="Blood Pressure" data-hi="रक्तचाप (BP)">Blood Pressure</p><canvas id="pChartBP"></canvas></div>
+                        <div class="chart-wrapper"><p style="font-weight:bold; color:#475569; margin-top:0;" class="lang-text" data-en="Blood Sugar" data-hi="ब्लड शुगर">Blood Sugar</p><canvas id="pChartSugar"></canvas></div>
+                        <div class="chart-wrapper"><p style="font-weight:bold; color:#475569; margin-top:0;" class="lang-text" data-en="Hemoglobin" data-hi="हीमोग्लोबिन">Hemoglobin</p><canvas id="pChartHemo"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-meds" class="section-view">
+                <div class="glass-card">
+                    <h3 style="margin-top:0;"><i class="fas fa-prescription-bottle-alt"></i> <span class="lang-text" data-en="All Active Prescriptions" data-hi="सभी सक्रिय दवाइयां">All Active Prescriptions</span></h3>
+                    <p style="color: #64748b; font-size: 0.9rem;" class="lang-text" data-en="*Please mark medicines as 'Taken' within 30 minutes of the prescribed time." data-hi="*कृपया निर्धारित समय के 30 मिनट के भीतर दवा को 'लिया गया' के रूप में चिह्नित करें।">*Please mark medicines as 'Taken' within 30 minutes of the prescribed time.</p>
+                    <div id="medicationListFull"></div>
+                </div>
+            </div>
+            
+            <div id="view-diet" class="section-view">
+                <div class="glass-card">
+                    <h2 class="plan-header"><i class="fas fa-apple-alt"></i> <span class="lang-text" data-en="Clinical Diet Plan" data-hi="क्लिनिकल आहार योजना">Clinical Diet Plan</span></h2>
+                    <p style="color: #64748b; font-size: 0.95rem; margin-top: -10px;" class="lang-text" data-en="Based on your primary diagnosis, follow this daily nutrition guide:" data-hi="आपके प्राथमिक निदान के आधार पर, इस दैनिक पोषण गाइड का पालन करें:">Based on your primary diagnosis, follow this daily nutrition guide:</p>
+                    <div class="plan-content" id="dietPlanContent"></div>
+                </div>
+            </div>
+
+            <div id="view-exercise" class="section-view">
+                <div class="glass-card">
+                    <h2 class="plan-header"><i class="fas fa-running"></i> <span class="lang-text" data-en="Physical Activity & Yoga" data-hi="शारीरिक गतिविधि और योग">Physical Activity & Yoga</span></h2>
+                    <p style="color: #64748b; font-size: 0.95rem; margin-top: -10px;" class="lang-text" data-en="Recommended daily exercises for your optimal recovery:" data-hi="आपके तेजी से रिकवरी के लिए अनुशंसित दैनिक व्यायाम:">Recommended daily exercises for your optimal recovery:</p>
+                    <div class="plan-content" id="exercisePlanContent"></div>
+                </div>
+            </div>
+
+            <div id="view-profile" class="section-view">
+                <div class="glass-card" style="max-width: 600px;">
+                    <h2 style="margin-top:0; color:#1e3c72;" class="lang-text" data-en="Personal Details" data-hi="व्यक्तिगत विवरण">Personal Details</h2>
+                    <div style="display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 20px;">
+                        <div style="width: 70px; height: 70px; background: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px;"><i class="fas fa-user"></i></div>
+                        <div>
+                            <h2 id="profName" style="margin:0; color:#1e3c72; text-align: left;">--</h2>
+                            <p id="profId" style="margin:5px 0 0 0; color:#64748b; font-weight:bold; text-align: left;">--</p>
+                        </div>
+                    </div>
+                    <p style="text-align: left;"><strong><span class="lang-text" data-en="Email:" data-hi="ईमेल:">Email:</span></strong> <span id="profEmail">--</span></p>
+                    <p style="text-align: left;"><strong><span class="lang-text" data-en="Age:" data-hi="उम्र:">Age:</span></strong> <span id="profAge">--</span></p>
+                    <p style="text-align: left;"><strong><span class="lang-text" data-en="Primary Condition:" data-hi="प्राथमिक रोग:">Primary Condition:</span></strong> <span id="profDisease" style="text-transform: uppercase; font-weight: bold; color: #0ea5e9;">--</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="floating-ai-btn" onclick="toggleAIChat()">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <div class="floating-chat-window" id="floatingAIChat">
+        <div class="ai-chat-header">
+            <div style="font-weight: bold; font-size: 1.1rem;"><i class="fas fa-robot"></i> MediBuddy</div>
+            <button onclick="toggleAIChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <div style="padding: 15px; background: #f8fafc; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0;">
+            Ask me about your diet, exercises, or general wellness!
+        </div>
+        <div class="chat-box" id="aiChatBox" style="background: white; border: none; border-radius: 0; margin-bottom: 0; flex: 1; height: 320px;">
+            <div class="msg ai"><strong style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:3px;">AI Assistant</strong>Hello! How can I help you feel better today?</div>
+        </div>
+        <div id="aiTyping" class="typing-indicator" style="padding: 0 15px 10px 15px; background: white;">AI is thinking...</div>
+        
+        <div style="display: flex; gap: 10px; padding: 15px; background: white; border-top: 1px solid #e2e8f0; align-items: center;">
+            <input type="file" id="aiImageInput" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
+            
+            <button class="icon-btn" onclick="document.getElementById('aiImageInput').click()" style="background: #e0f2fe; color: #0284c7; width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fas fa-camera"></i>
+            </button>
+            
+            <input type="text" id="aiChatInput" style="margin: 0; flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;" placeholder="Ask or upload an image...">
+            <button class="ai-btn" onclick="sendAIMessage()" style="padding: 10px 15px;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div id="imagePreviewContainer" style="display: none; padding: 0 15px 10px; background: white;">
+            <span style="font-size: 0.8rem; color: #10b981; font-weight: bold;"><i class="fas fa-image"></i> Image attached & ready to send!</span>
+        </div>
+    </div>
+
+    <div id="chatModal" class="modal">
+        <div class="modal-content" style="text-align: left; width: 450px;">
+            <h3 style="color:#1e3c72; margin-top:0;"><i class="fas fa-user-md"></i> <span class="lang-text" data-en="Chat with Doctor" data-hi="डॉक्टर से चैट करें">Chat with Doctor</span></h3>
+            <div class="chat-box" id="chatBox"></div>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="chatInput" style="margin: 0; flex: 1;" placeholder="Type a message...">
+                <button class="btn-update" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+            <button onclick="closeModal('chatModal')" style="width:100%; background:none; border:none; margin-top:10px; cursor:pointer; color:#64748b;"><span class="lang-text" data-en="Close" data-hi="बंद करें">Close</span></button>
+        </div>
+    </div>
+
+    <div id="updateModal" class="modal">
+        <div class="modal-content" style="text-align: left;">
+            <h3 style="color:#1e3c72; margin-top:0;" class="lang-text" data-en="Daily Health Log" data-hi="दैनिक स्वास्थ्य लॉग">Daily Health Log</h3>
+            <label class="lang-text" data-en="Blood Pressure" data-hi="रक्तचाप (BP)">Blood Pressure</label><input type="text" id="inBP" placeholder="120/80">
+            <label class="lang-text" data-en="Blood Sugar" data-hi="ब्लड शुगर">Blood Sugar</label><input type="number" id="inSugar">
+            <label class="lang-text" data-en="Heart Rate" data-hi="हृदय गति">Heart Rate</label><input type="number" id="inHR">
+            <label class="lang-text" data-en="New Symptom" data-hi="नया लक्षण">New Symptom</label><input type="text" id="inSym" placeholder="e.g. Mild headache">
+            <button style="background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width:100%; margin-top:10px; cursor: pointer;" onclick="saveVitals()"><span class="lang-text" data-en="Save & Send to Doctor" data-hi="सेव करें">Save & Send to Doctor</span></button>
+            <button onclick="closeModal('updateModal')" style="width:100%; background:none; border:none; margin-top:10px; cursor:pointer; color:#64748b;"><span class="lang-text" data-en="Close" data-hi="बंद करें">Close</span></button>
+        </div>
+    </div>
+
+    <div id="notifModal" class="modal">
+        <div class="modal-content" style="text-align: left;">
+            <h3 style="color:#1e3c72; margin-top:0; border-bottom:1px solid #e2e8f0; padding-bottom:10px;" class="lang-text" data-en="Notifications" data-hi="सूचनाएं">Notifications</h3>
+            <div id="notifListContainer" style="margin-top: 10px;"></div>
+            <button onclick="closeModal('notifModal')" style="width:100%; background:#f1f5f9; border:none; padding:10px; border-radius:8px; margin-top:15px; cursor:pointer; font-weight:bold; color:#475569;"><span class="lang-text" data-en="Close" data-hi="बंद करें">Close</span></button>
+        </div>
+    </div>
+
+    <div id="missedMedWarningModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #e11d48; margin-bottom: 15px;"></i>
+            <h2 style="color: #e11d48; margin-top: 0;" class="lang-text" data-en="Missed Medication Alert!" data-hi="छूटी हुई दवा का अलर्ट!">Missed Medication Alert!</h2>
+            <p id="missedMedWarningText" style="color: #334155; font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5;"></p>
+            <button onclick="closeModal('missedMedWarningModal')" style="background: #e11d48; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer;"><span class="lang-text" data-en="I Understand" data-hi="मैं समझ गया">I Understand</span></button>
+        </div>
+    </div>
+    
+    <div id="earlyMedWarningModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <i class="fas fa-clock" style="font-size: 50px; color: #d97706; margin-bottom: 15px;"></i>
+            <h2 style="color: #d97706; margin-top: 0;" class="lang-text" data-en="Too Early!" data-hi="बहुत जल्दी!">Too Early!</h2>
+            <p id="earlyMedWarningText" style="color: #334155; font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5;"></p>
+            <button onclick="closeModal('earlyMedWarningModal')" style="background: #d97706; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer;"><span class="lang-text" data-en="I Understand" data-hi="मैं समझ गया">I Understand</span></button>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

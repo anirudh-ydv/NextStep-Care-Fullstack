@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - NextStep Care</title>
+    <link rel="stylesheet" href="stylo.css?v=2">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="landing-body">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <img src="logo.png" alt="Company Logo" onerror="this.src='https://via.placeholder.com/40?text=🏥'">
+                <h1>Create Account</h1>
+                <p>Join NextStep-Care today</p>
+            </div>
+            
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                
+                <div class="input-group">
+                    <i class="fas fa-user-tag"></i>
+                    <select id="userType" onchange="toggleSpecialization()" required>
+                        <option value="doctor">Doctor</option>
+                        <option value="patient">Patient</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="name" placeholder="Full Name" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Email Address" required>
+                </div>
+
+                <div class="input-group" id="specGroup">
+                    <i class="fas fa-user-md"></i>
+                    <input type="text" id="specialization" placeholder="Specialization (Doctor only)">
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Password (Min 6 chars)" required>
+                </div>
+                
+                <button type="submit">Register Account <i class="fas fa-user-plus" style="margin-left: 5px;"></i></button>
+            </form>
+            <div class="links">
+                <a href="login.html">Already have an account? Login here</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - NextStep Care</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="stylo.css">
+</head>
+<body class="dashboard-body">
+
+    <div class="sidebar">
+        <a onclick="switchTab('overview')" id="tab-overview" class="sidebar-item active"><i class="fas fa-chart-pie"></i> Overview</a>
+        <a onclick="switchTab('patients')" id="tab-patients" class="sidebar-item"><i class="fas fa-users"></i> Patient List</a>
+        <a href="add-patient.html" class="sidebar-item"><i class="fas fa-user-plus"></i> Add New Patient</a>
+        <a onclick="switchTab('analytics')" id="tab-analytics" class="sidebar-item"><i class="fas fa-chart-line"></i> Analytics</a>
+        <a onclick="switchTab('profile')" id="tab-profile" class="sidebar-item"><i class="fas fa-user-md"></i> My Profile</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="logo-area"><img src="logo.png" alt="Company Logo" style="max-width:18%; height:18%; margin-right: 10px;"> NextStep-Care</div>
+            <div class="user-area">
+                <span id="doctorName">Dr. Loading...</span>
+                <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            
+            <div id="view-overview" class="section-view active">
+                <h2 style="color: #1e3c72; margin-top: 0;">Dashboard Overview</h2>
+                <div class="card-grid">
+                    <div class="card"><div class="icon-box icon-blue"><i class="fas fa-users"></i></div><div class="card-stats"><h2 id="totalPatientsCount">0</h2><p>Total Patients</p></div></div>
+                    <div class="card"><div class="icon-box icon-red"><i class="fas fa-exclamation-triangle"></i></div><div class="card-stats"><h2 id="criticalCasesCount">0</h2><p>Critical Cases</p></div></div>
+                    <div class="card"><div class="icon-box icon-orange"><i class="fas fa-calendar-check"></i></div><div class="card-stats"><h2 id="appointmentsCount">0</h2><p>Today's Appointments</p></div></div>
+                </div>
+            </div>
+
+            <div id="view-patients" class="section-view">
+                <h2 style="color: #1e3c72; margin-top: 0;">My Active Patients</h2>
+                <div class="table-container">
+                    <div class="filter-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchName" placeholder="Search patient by name...">
+                        </div>
+                        <select id="filterStatus" class="filter-select">
+                            <option value="all">All Statuses</option>
+                            <option value="stable">Stable</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                        <select id="filterDisease" class="filter-select">
+                            <option value="all">All Diseases</option>
+                        </select>
+                    </div>
+
+                    <table class="doc-table">
+                        <thead>
+                            <tr><th>ID</th><th>Name</th><th>Disease</th><th>Next Appt.</th><th>Status</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="patientTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-analytics" class="section-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="color: #1e3c72; margin-top: 0;">Clinical Analytics Explorer</h2>
+                    <select id="analyticsPatientSelect" style="padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; width: 300px; font-weight: bold; color: #1e3c72; outline: none; font-family: inherit;">
+                        <option value="">-- Select a Patient --</option>
+                    </select>
+                </div>
+
+                <div id="analyticsEmptyState" style="text-align: center; padding: 60px; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                    <i class="fas fa-user-md" style="font-size: 60px; color: #cbd5e1; margin-bottom: 20px;"></i>
+                    <h3 style="color: #64748b; margin: 0;">Select a patient from the dropdown to view their recovery trends.</h3>
+                </div>
+
+                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px;">
+                    <button id="runTriageBtn" class="btn-main" style="display:none; background: linear-gradient(135deg, #8b5cf6, #3b82f6); border: none;" onclick="runAIPrediction()">
+                        <i class="fas fa-brain"></i> Run AI Predictive Triage
+                    </button>
+                </div>
+                
+                <div id="aiTriageResult" style="display:none; background: #f8fafc; border: 2px solid #8b5cf6; padding: 20px; border-radius: 15px; margin-bottom: 25px;">
+                    <h3 style="margin-top:0; color:#8b5cf6;"><i class="fas fa-robot"></i> AI Risk Assessment</h3>
+                    <p id="aiTriageText" style="color: #334155; line-height: 1.6; margin: 0;">Analyzing trends...</p>
+                </div>
+
+                <div id="analyticsChartsGrid" style="display: none; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="background: white; padding: 20px; border-radius: 20px; height: 260px;"><h4 style="margin: 0 0 10px 0; color: #64748b;">Blood Pressure (Sys/Dia)</h4><canvas id="dashChartBP"></canvas></div>
+                    <div style="background: white; padding: 20px; border-radius: 20px; height: 260px;"><h4 style="margin: 0 0 10px 0; color: #64748b;">Blood Sugar Trend</h4><canvas id="dashChartSugar"></canvas></div>
+                    <div style="background: white; padding: 20px; border-radius: 20px; height: 260px;"><h4 style="margin: 0 0 10px 0; color: #64748b;">Hemoglobin Levels</h4><canvas id="dashChartHemo"></canvas></div>
+                    <div style="background: white; padding: 20px; border-radius: 20px; height: 260px;"><h4 style="margin: 0 0 10px 0; color: #64748b;">Heart Rate</h4><canvas id="dashChartHR"></canvas></div>
+                </div>
+            </div>
+
+            <div id="view-profile" class="section-view">
+                <h2 style="color: #1e3c72; margin-top: 0;">Doctor Profile</h2>
+                <div style="background: white; border-radius: 16px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 600px;">
+                    <div style="display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 20px;">
+                        <div style="width: 80px; height: 80px; background: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px;">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div>
+                            <h1 id="docProfileName" style="margin: 0; color: #1e3c72;">Dr. Name</h1>
+                            <p id="docProfileId" style="margin: 5px 0 0 0; color: #64748b; font-weight: bold;">ID: ---</p>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #64748b; font-size: 0.85rem; font-weight: bold;">EMAIL ADDRESS</label>
+                        <p id="docProfileEmail" style="margin: 5px 0 0 0; font-size: 1.1rem; color: #1e293b; font-weight: 600;">--</p>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #64748b; font-size: 0.85rem; font-weight: bold;">ACCOUNT ROLE</label>
+                        <p style="margin: 5px 0 0 0; font-size: 1.1rem; color: #1e293b; font-weight: 600; text-transform: capitalize;">Doctor / Provider</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
